@@ -1,0 +1,10 @@
+**/tests.py
+*.env
+.git
+.gitignore
+*.sqlite3
+*.md
+**/__pycache__/
+**/*.pyc
+**/*.pyo
+/venv
