@@ -75,6 +75,7 @@ DOMAIN_URL: Es el dominio propio y es el cual se usará para crear los urls acor
 
 DATABASE_URL: Es la url de conexión para la base de datos y por defecto se establece una base de datos sqlite cuando se está en modo de debug.
 
+ALLOWED_ORIGINS_LIST: Es una lista con los los origenes permitidos para hacer consultas al backend.
 
 Cuando las variables de entorno se encuentren correctamente configuradas es momento de ejecutar el servidor con el siguiente comando.
 
