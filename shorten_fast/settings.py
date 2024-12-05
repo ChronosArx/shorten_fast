@@ -31,7 +31,6 @@ DOMAIN_URL = env("DOMAIN_URL")
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=["*"])
-SECURE_SSL_REDIRECT = env.bool("SSL", default=False)
 
 CORS_ALLOWED_ORIGINS = env.list("CORS_ALLOWED_ORIGINS", default=[])
 
