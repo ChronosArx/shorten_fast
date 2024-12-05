@@ -29,11 +29,13 @@ EXPIRE_TIME_TOKEN_MINUTES = env.int("EXPIRE_TIME_TOKEN_MINUTES", default=5)
 EXPIRE_TIME_TOKEN_DAYS = env.int("EXPIRE_TIME_TOKEN_DAYS", default=7)
 ALLOWED_ORIGINS_LIST = env.list("ALLOWED_ORIGINS_LIST", default=[])
 ALLOWED_HOSTS_LIST = env.list("ALLOWED_HOSTS_LIST", default=[])
+SSL = env.bool("SSL", default=False)
 DOMAIN_URL = env("DOMAIN_URL")
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 ALLOWED_HOSTS = ALLOWED_HOSTS_LIST
+SECURE_SSL_REDIRECT = SSL
 
 
 # Application definition
