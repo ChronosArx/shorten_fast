@@ -27,16 +27,14 @@ DEBUG = env.bool("DEBUG", default=True)
 SECRET_KEY = env("SECRET_KEY")
 EXPIRE_TIME_TOKEN_MINUTES = env.int("EXPIRE_TIME_TOKEN_MINUTES", default=5)
 EXPIRE_TIME_TOKEN_DAYS = env.int("EXPIRE_TIME_TOKEN_DAYS", default=7)
-ALLOWED_ORIGINS_LIST = env.list("ALLOWED_ORIGINS_LIST", default=[])
-ALLOWED_HOSTS_LIST = env.list("ALLOWED_HOSTS_LIST", default=[])
-SSL = env.bool("SSL", default=False)
 DOMAIN_URL = env("DOMAIN_URL")
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
-ALLOWED_HOSTS = ALLOWED_HOSTS_LIST
-SECURE_SSL_REDIRECT = SSL
+ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=[])
+SECURE_SSL_REDIRECT = env.bool("SSL", default=False)
 
+CORS_ALLOWED_ORIGINS = env.list("CORS_ALLOWED_ORIGINS", default=[])
 
 # Application definition
 DJANGO_APPS = [
@@ -73,7 +71,6 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-CORS_ALLOWED_ORIGINS = ALLOWED_ORIGINS_LIST
 
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=EXPIRE_TIME_TOKEN_MINUTES),
