@@ -21,7 +21,6 @@ from drf_spectacular.views import SpectacularSwaggerView, SpectacularAPIView
 from shorten.views import Redirects
 
 urlpatterns = [
-    path("<str:code>/", Redirects.as_view(), name="redirects"),
     path("admin/", admin.site.urls),
     path("api/", include("shorten.urls")),
     path("api/", include("authentication.urls")),
@@ -31,4 +30,5 @@ urlpatterns = [
         SpectacularSwaggerView.as_view(url_name="schema"),
         name="swagger-ui",
     ),
+    path("<str:code>/", Redirects.as_view(), name="redirects"),
 ]
