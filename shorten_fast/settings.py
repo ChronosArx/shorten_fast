@@ -23,10 +23,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 env = environ.Env(DEBUG=(bool, False))
 environ.Env.read_env(os.path.join(BASE_DIR, ".env"))
 
-DEBUG = env("DEBUG")
+DEBUG = env.bool("DEBUG", default=True)
 SECRET_KEY = env("SECRET_KEY")
-EXPIRE_TIME_TOKEN_MINUTES = env.int("EXPIRE_TIME_TOKEN_MINUTES")
-EXPIRE_TIME_TOKEN_DAYS = env.int("EXPIRE_TIME_TOKEN_DAYS")
+EXPIRE_TIME_TOKEN_MINUTES = env.int("EXPIRE_TIME_TOKEN_MINUTES", default=5)
+EXPIRE_TIME_TOKEN_DAYS = env.int("EXPIRE_TIME_TOKEN_DAYS", default=7)
+CORS_ALLOWED_ORIGINS_LIST = env.list("CORS_ALLOWED_ORIGINS_LIST", default=[])
 DOMAIN_URL = env("DOMAIN_URL")
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
@@ -69,9 +70,7 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173",
-]
+CORS_ALLOWED_ORIGINS = CORS_ALLOWED_ORIGINS_LIST
 
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=EXPIRE_TIME_TOKEN_MINUTES),
