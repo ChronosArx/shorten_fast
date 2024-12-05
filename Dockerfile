@@ -10,4 +10,4 @@ COPY ./  /app
 
 EXPOSE 8443
 
-CMD ["sh", "-c", "python manage.py migrate && gunicorn --bind 0.0.0.0:8443 shorten_fast.wsgi.application"]
+CMD ["sh", "-c", "python manage.py migrate && gunicorn --bind 0.0.0.0:8443 shorten_fast.wsgi:application"]
