@@ -14,10 +14,17 @@ from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
 from rest_framework.permissions import AllowAny
-from .serializers import UserRegisterSerializer, UserLogInSerializer, EmptySerializer
+from .serializers import (
+    UserRegisterSerializer,
+    UserLogInSerializer,
+    ConfirmCodeSerializer,
+)
+from .services import send_confirm_email
+from .models import CodeToConfirm
+from shorten.utils import generate_short_code
 
 
-response_acccess_token = OpenApiResponse(
+response_access_token = OpenApiResponse(
     response=OpenApiTypes.OBJECT,
     description="Retorna el token de acceso",
     examples=[
@@ -37,33 +44,32 @@ class Register(generics.CreateAPIView):
     serializer_class = UserRegisterSerializer
     permission_classes = [AllowAny]
 
+    def perform_create(self, serializer):
+        user = serializer.save(is_active=False)
+        return user
+
     @extend_schema(
         description="Este endpoint recibe un usario, contraseña y correo electrónico para poder hacer el registro en la plataforma.\n\n"
         "De igual manera al completar el registro retornara un access token y un refresh token el cual irá en una cookie"
         "este último para poder obtener nuevos tokens de acceso.",
-        responses={status.HTTP_201_CREATED: response_acccess_token},
+        responses={status.HTTP_201_CREATED: response_access_token},
     )
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
-        if serializer.is_valid(raise_exception=True):
-            user = serializer.save()
+        serializer.is_valid(raise_exception=True)
 
-            access_token = AccessToken.for_user(user=user)
-            refresh_token = RefreshToken.for_user(user=user)
+        user = self.perform_create(serializer)
+        code = generate_short_code()
 
-            response = Response(
-                {"access_token": str(access_token)}, status=status.HTTP_201_CREATED
-            )
+        code_confirm = CodeToConfirm(code=code, user=user)
+        code_confirm.save()
 
-            response.set_cookie(
-                key="refresh_token",
-                value=str(refresh_token),
-                httponly=True,
-                samesite="Lax",
-                secure=True,
-            )
+        send_confirm_email(email=str(user.email), code=str(code))
 
-            return response
+        return Response(
+            data="An email was sent with a confirmation code!",
+            status=status.HTTP_200_OK,
+        )
 
 
 @extend_schema(tags=["Authentication"], auth=[])
@@ -74,7 +80,7 @@ class LogIn(generics.CreateAPIView):
     @extend_schema(
         description="Este endpoint recibe usuario y contraseña para poder hacer login.\n\n"
         "De igual manera envía un token de acceso y un refresh token igual en cookies",
-        responses={status.HTTP_200_OK: response_acccess_token},
+        responses={status.HTTP_200_OK: response_access_token},
     )
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -131,13 +137,13 @@ class LogOut(APIView):
 
 
 @extend_schema(tags=["Authentication"], auth=[])
-class GenerateAccesToken(APIView):
+class GenerateAccessToken(APIView):
     serializer_class = None
     permission_classes = [AllowAny]
 
     @extend_schema(
         description="Este endpoint recibe el refresh token desde las cookies y retorna de respuesta un nuevo access token.",
-        responses={status.HTTP_200_OK: response_acccess_token},
+        responses={status.HTTP_200_OK: response_access_token},
     )
     def get(self, request):
         try:
@@ -157,3 +163,34 @@ class GenerateAccesToken(APIView):
             )
         except TokenError as e:
             return Response({"valid": False, "Error": str(e)})
+
+
+@extend_schema(tags=["Authentication"], auth=[])
+class ConfirmEmail(generics.CreateAPIView):
+    serializer_class = ConfirmCodeSerializer
+    permission_classes = [AllowAny]
+
+    def post(self, request, *args, **kwargs):
+        code_request = request.data.get("code")
+        code_confirm = CodeToConfirm.objects.filter(code=code_request).first()
+
+        user = User.objects.filter(id=code_confirm.user.id).first()
+        user.is_active = True
+        user.save()
+
+        access_token = AccessToken.for_user(user=user)
+        refresh_token = RefreshToken.for_user(user=user)
+
+        response = Response(
+            {"access_token": str(access_token)}, status=status.HTTP_201_CREATED
+        )
+
+        response.set_cookie(
+            key="refresh_token",
+            value=str(refresh_token),
+            httponly=True,
+            samesite="Lax",
+            secure=True,
+        )
+
+        return response

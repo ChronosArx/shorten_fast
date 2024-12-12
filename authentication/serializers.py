@@ -27,5 +27,5 @@ class UserLogInSerializer(serializers.Serializer):
         return attrs
 
 
-class EmptySerializer(serializers.Serializer):
-    pass
+class ConfirmCodeSerializer(serializers.Serializer):
+    code = serializers.CharField(max_length=6)
