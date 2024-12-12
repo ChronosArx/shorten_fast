@@ -1,6 +1,6 @@
 import string
 import random
-from shorten_fast.settings import DOMAIN_URL
+from config.settings.base import DOMAIN_URL
 
 
 def generate_short_code(length=6):
@@ -8,6 +8,5 @@ def generate_short_code(length=6):
     return "".join(random.choice(characters) for _ in range(length))
 
 
-def genere_short_url(code: int):
-    # Agregar mas logica TODO
+def generate_short_url(code: int):
     return f"{DOMAIN_URL}/{code}"

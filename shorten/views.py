@@ -1,6 +1,7 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.permissions import AllowAny
 from drf_spectacular.utils import extend_schema
 from django.shortcuts import redirect
 from shorten.models import ShortLink
@@ -15,6 +16,7 @@ from shorten.models import ShortLink
 class Redirects(APIView):
     queryset = ShortLink.objects.all()
     serializer_class = None
+    permission_classes = [AllowAny]
 
     def get(self, request, code):
         shortLink = self.queryset.filter(code=code).first()

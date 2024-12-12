@@ -9,7 +9,7 @@ from drf_spectacular.utils import (
 )
 from .serializers import ShortLinkCreateSerializer, ShortLinkSerializer
 from .models import ShortLink
-from .utils import generate_short_code, genere_short_url
+from .utils import generate_short_code, generate_short_url
 from .services import generate_qr
 from .permissions import IsAuthenticatedOrCreate
 from .mixins import CreateSerializerMixin
@@ -57,7 +57,7 @@ class ShortLinkViewSet(
 
     def perform_create(self, serializer):
         code = generate_short_code()
-        short_url = genere_short_url(code=code)
+        short_url = generate_short_url(code=code)
         if self.request.user.is_anonymous:
             serializer.save(code=code, short_url=short_url, user_id=None)
             return
