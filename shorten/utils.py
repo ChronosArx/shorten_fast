@@ -1,6 +1,6 @@
 import string
 import random
-from config.settings.base import DOMAIN_URL
+from shorten_fast.settings import DOMAIN_URL
 
 
 def generate_short_code(length=6):
