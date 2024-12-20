@@ -22,7 +22,7 @@ from .serializers import (
 from .services import send_confirm_email
 from .models import CodeToConfirm
 from shorten.utils import generate_short_code
-
+from datetime import timedelta
 
 response_access_token = OpenApiResponse(
     response=OpenApiTypes.OBJECT,
@@ -84,34 +84,34 @@ class LogIn(generics.CreateAPIView):
     )
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
-        if serializer.is_valid(raise_exception=True):
-            username = serializer.validated_data["username"]
-            password = serializer.validated_data["password"]
+        serializer.is_valid(raise_exception=True)
+        username = serializer.validated_data["username"]
+        password = serializer.validated_data["password"]
 
-            user = authenticate(request, username=username, password=password)
+        user = authenticate(request, username=username, password=password)
 
-            if user is not None:
-                access_token = AccessToken.for_user(user=user)
-                refresh_token = RefreshToken.for_user(user=user)
+        if user is not None:
+            access_token = AccessToken.for_user(user=user)
+            refresh_token = RefreshToken.for_user(user=user)
 
-                response = Response(
-                    {"access_token": str(access_token)}, status=status.HTTP_200_OK
-                )
+            response = Response(
+                data={"access_token": str(access_token)}, status=status.HTTP_200_OK
+            )
+            response.set_cookie(
+                key="refresh_token",
+                value=str(refresh_token),
+                max_age=timedelta(days=7),
+                httponly=True,
+                samesite="Lax",
+                secure=True,
+            )
 
-                response.set_cookie(
-                    key="refresh_token",
-                    value=str(refresh_token),
-                    httponly=True,
-                    samesite="Lax",
-                    secure=True,
-                )
-
-                return response
-            else:
-                return Response(
-                    {"error": "Credenciales inválidas"},
-                    status=status.HTTP_401_UNAUTHORIZED,
-                )
+            return response
+        else:
+            return Response(
+                {"error": "Credenciales inválidas"},
+                status=status.HTTP_401_UNAUTHORIZED,
+            )
 
 
 @extend_schema(tags=["Authentication"], auth=[])
