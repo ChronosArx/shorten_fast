@@ -8,8 +8,6 @@ class IsAuthenticatedOrCreate(BasePermission):
     """
 
     def has_permission(self, request, view):
-        # Permitir a cualquier usuario hacer POST
         if request.method == "POST":
             return True
-        # Requiere autenticación para otros métodos
         return request.user.is_authenticated
