@@ -8,5 +8,5 @@ def generate_short_code(length=6):
     return "".join(random.choice(characters) for _ in range(length))
 
 
-def generate_short_url(code: int):
+def generate_short_url(code: str):
     return f"{DOMAIN_URL}/{code}"

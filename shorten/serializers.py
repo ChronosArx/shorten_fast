@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from ..models import ShortLink
+from .models import ShortLink
 
 
 class ShortLinkCreateSerializer(serializers.ModelSerializer):

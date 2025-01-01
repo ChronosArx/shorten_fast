@@ -8,9 +8,9 @@ from drf_spectacular.utils import (
     OpenApiParameter,
 )
 from .serializers import ShortLinkCreateSerializer, ShortLinkSerializer
-from ..models import ShortLink
-from ..utils import generate_short_code, generate_short_url
-from ..services import generate_qr
+from .models import ShortLink
+from .utils import generate_short_code, generate_short_url
+from .services import generate_qr
 from .permissions import IsAuthenticatedOrCreate
 from .mixins import CreateSerializerMixin
 
