@@ -5,13 +5,13 @@ import os
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
-
 # environment variable
 environ.Env.read_env(os.path.join(BASE_DIR, ".env"))
 env = environ.Env()
 DOMAIN_URL = env("DOMAIN_URL", default="http://localhost:8000")
-RESEND_API_KEY = env("RESEND_API_KEY", default="no-key")
+RESEND_API_KEY = env("RESEND_API_KEY")
 CORS_ALLOW_CREDENTIALS = True
+
 # Application definition
 DJANGO_APPS = [
     "django.contrib.admin",
@@ -26,13 +26,13 @@ LOCAL_APPS = [
     "authentication",
     "shorten",
 ]
+
 THIRD_APPS = [
     "rest_framework",
     "drf_spectacular",
     "rest_framework_simplejwt",
     "corsheaders",
 ]
-
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_APPS + LOCAL_APPS
 
@@ -54,7 +54,6 @@ LOCAL_MIDDLEWARE = []
 
 MIDDLEWARE = DJANGO_MIDDLEWARE + THIRD_MIDDLEWARE + LOCAL_MIDDLEWARE
 
-
 ROOT_URLCONF = "shorten_fast.urls"
 
 TEMPLATES = [
@@ -75,7 +74,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "shorten_fast.wsgi.application"
 
-
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
 
@@ -93,7 +91,6 @@ AUTH_PASSWORD_VALIDATORS = [
         "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
     },
 ]
-
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
