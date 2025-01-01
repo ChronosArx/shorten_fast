@@ -20,9 +20,9 @@ from .serializers import (
     ConfirmCodeSerializer,
 )
 
-# from ..services import send_confirm_email
+from .services import send_confirm_email
 from .models import CodeToConfirm
-from shorten.utils import generate_short_code
+from .utils import generate_code
 from datetime import timedelta
 
 response_access_token = OpenApiResponse(
@@ -179,7 +179,6 @@ class CheckAuth(APIView):
             )
 
 
-"""
 @extend_schema(tags=["Authentication"], auth=[])
 class ConfirmEmail(generics.CreateAPIView):
     serializer_class = ConfirmCodeSerializer
@@ -209,4 +208,3 @@ class ConfirmEmail(generics.CreateAPIView):
         )
 
         return response
-"""
