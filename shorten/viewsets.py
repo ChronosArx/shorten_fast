@@ -7,12 +7,11 @@ from drf_spectacular.utils import (
     OpenApiResponse,
     OpenApiParameter,
 )
-from .serializers import ShortLinkCreateSerializer, ShortLinkSerializer
+from .serializers import ShortLinkSerializer
 from .models import ShortLink
 from .utils import generate_short_code, generate_short_url
 from .services import generate_qr
 from .permissions import IsAuthenticatedOrCreate
-from .mixins import CreateSerializerMixin
 
 
 id_param = OpenApiParameter(
@@ -44,11 +43,9 @@ id_param = OpenApiParameter(
 )
 @extend_schema(tags=["Shortlink"])
 class ShortLinkViewSet(
-    CreateSerializerMixin,
     viewsets.ModelViewSet,
 ):
     serializer_class = ShortLinkSerializer
-    create_serializer_class = ShortLinkCreateSerializer
     permission_classes = [IsAuthenticatedOrCreate]
     http_method_names = ["get", "post", "delete", "put"]
 
