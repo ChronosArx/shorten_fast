@@ -4,12 +4,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework_simplejwt.tokens import AccessToken, RefreshToken
 from rest_framework_simplejwt.exceptions import TokenError
-from drf_spectacular.utils import (
-    extend_schema,
-    OpenApiResponse,
-    OpenApiExample,
-)
-from drf_spectacular.types import OpenApiTypes
+from drf_spectacular.utils import extend_schema, OpenApiResponse
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
@@ -23,20 +18,8 @@ from .serializers import (
 from .services import send_confirm_email
 from .models import CodeToConfirm
 from .utils import generate_code
+from .docs import response_access_token
 from datetime import timedelta
-
-response_access_token = OpenApiResponse(
-    response=OpenApiTypes.OBJECT,
-    description="Retorna el token de acceso",
-    examples=[
-        OpenApiExample(
-            name="access_token",
-            value={
-                "access_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzAwMDAwMDAwLCJpYXQiOjE2MDAwMDAwMDAsImp0aSI6IjEyMzQ1Njc4OTAiLCJ1c2VyX2lkIjoxfQ.n3IA6Of8g93IMV9G5u5ziN6ZtE6fWUcNu2Z6iHCjFWo",
-            },
-        )
-    ],
-)
 
 
 # Create your views here.
@@ -60,7 +43,7 @@ class Register(generics.CreateAPIView):
         serializer.is_valid(raise_exception=True)
 
         user = self.perform_create(serializer)
-        code = generate_short_code()
+        code = generate_code()
 
         code_confirm = CodeToConfirm(code=code, user=user)
         code_confirm.save()
@@ -69,12 +52,12 @@ class Register(generics.CreateAPIView):
 
         return Response(
             data="An email was sent with a confirmation code!",
-            status=status.HTTP_200_OK,
+            status=status.HTTP_201_CREATED,
         )
 
 
 @extend_schema(tags=["Authentication"], auth=[])
-class LogIn(generics.CreateAPIView):
+class LogIn(generics.GenericAPIView):
     serializer_class = UserLogInSerializer
     permission_classes = [AllowAny]
 
@@ -168,25 +151,41 @@ class GenerateAccessToken(APIView):
 
 @extend_schema(tags=["Authentication"], auth=[])
 class CheckAuth(APIView):
+    serializer_class = None
+
     def get(self, request):
-        token = request.COOKIES.get("refresh_token")
         try:
+            token = request.COOKIES.get("refresh_token")
+            if token is None:
+                return Response(
+                    {"detail": "Credentials Error!", "IsLogged": False},
+                    status=status.HTTP_401_UNAUTHORIZED,
+                )
             token = RefreshToken(token)
-            return Response({"IsAuthenticated": True}, status=status.HTTP_200_OK)
+            return Response({"IsLogged": True}, status=status.HTTP_200_OK)
         except TokenError:
-            return Response(
-                {"IsAuthenticated": False}, status=status.HTTP_401_UNAUTHORIZED
-            )
+            return Response({"IsLogged": False}, status=status.HTTP_401_UNAUTHORIZED)
 
 
 @extend_schema(tags=["Authentication"], auth=[])
-class ConfirmEmail(generics.CreateAPIView):
+class ConfirmEmail(APIView):
     serializer_class = ConfirmCodeSerializer
     permission_classes = [AllowAny]
 
     def post(self, request, *args, **kwargs):
         code_request = request.data.get("code")
+
+        if not code_request:
+            return Response(
+                {"error": "Invalid Code"}, status=status.HTTP_400_BAD_REQUEST
+            )
+
         code_confirm = CodeToConfirm.objects.filter(code=code_request).first()
+
+        if not code_confirm:
+            return Response(
+                {"error": "Invalid Code"}, status=status.HTTP_400_BAD_REQUEST
+            )
 
         user = User.objects.filter(id=code_confirm.user.id).first()
         user.is_active = True
@@ -196,7 +195,7 @@ class ConfirmEmail(generics.CreateAPIView):
         refresh_token = RefreshToken.for_user(user=user)
 
         response = Response(
-            {"access_token": str(access_token)}, status=status.HTTP_201_CREATED
+            {"access_token": str(access_token)}, status=status.HTTP_200_OK
         )
 
         response.set_cookie(
