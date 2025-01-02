@@ -1,6 +1,8 @@
 from django.urls import reverse
 from rest_framework.test import APITestCase
+from unittest.mock import patch
 from rest_framework import status
+from authentication.models import CodeToConfirm
 
 
 # Create your tests here.
@@ -21,9 +23,13 @@ class ShortenTests(APITestCase):
         }
         self.short_link_data_incorrect = {"original_url": "no-is-url"}
 
-        reesponse = self.client.post(reverse("register"), data=self.register_data)
-        response_data = reesponse.json()
-        self.token = response_data.get("access_token")
+        with patch("authentication.views.send_confirm_email") as moc_send_confirm_email:
+            moc_send_confirm_email.return_value = None
+            self.client.post(reverse("register"), self.register_data)
+            code = CodeToConfirm.objects.first().code
+            response = self.client.post(reverse("confirm_email"), {"code": code})
+            response_data = response.json()
+            self.token = response_data.get("access_token")
 
     def test_short_link(self):
         # sin titulo
