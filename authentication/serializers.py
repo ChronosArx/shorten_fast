@@ -16,15 +16,8 @@ class UserRegisterSerializer(serializers.ModelSerializer):
 
 
 class UserLogInSerializer(serializers.Serializer):
-    username = serializers.CharField()
-    password = serializers.CharField()
-
-    def validate(self, attrs):
-        username = attrs.get("username")
-        password = attrs.get("password")
-        if not username or not password:
-            raise ValidationError("Ambos campos son obligatorios.")
-        return attrs
+    username = serializers.CharField(max_length=250)
+    password = serializers.CharField(write_only=True)
 
 
 class ConfirmCodeSerializer(serializers.Serializer):
