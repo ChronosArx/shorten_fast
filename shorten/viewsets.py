@@ -24,6 +24,9 @@ id_param = OpenApiParameter(
 
 
 @extend_schema_view(
+    list=extend_schema(
+        description="Se utiliza para obtener una lista de todos los links acortados del usuario",
+    ),
     create=extend_schema(
         description="Solo los usuarios registrados pueden enviar un titulo para la creación del link acortado.",
         responses=ShortLinkSerializer,
