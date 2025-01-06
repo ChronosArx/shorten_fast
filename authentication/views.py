@@ -162,9 +162,9 @@ class CheckAuth(APIView):
                     status=status.HTTP_401_UNAUTHORIZED,
                 )
             token = RefreshToken(token)
-            return Response({"IsLogged": True}, status=status.HTTP_200_OK)
+            return Response({"isLogged": True}, status=status.HTTP_200_OK)
         except TokenError:
-            return Response({"IsLogged": False}, status=status.HTTP_401_UNAUTHORIZED)
+            return Response({"isLogged": False}, status=status.HTTP_401_UNAUTHORIZED)
 
 
 @extend_schema(tags=["Authentication"], auth=[])
