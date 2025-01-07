@@ -191,6 +191,8 @@ class ConfirmEmail(APIView):
         user.is_active = True
         user.save()
 
+        code_confirm.delete()
+
         access_token = AccessToken.for_user(user=user)
         refresh_token = RefreshToken.for_user(user=user)
 
