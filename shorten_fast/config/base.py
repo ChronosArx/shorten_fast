@@ -9,7 +9,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent
 environ.Env.read_env(os.path.join(BASE_DIR, ".env"))
 env = environ.Env()
 DOMAIN_URL = env("DOMAIN_URL", default="http://localhost:8000")
-RESEND_API_KEY = env("RESEND_API_KEY")
+RESEND_API_KEY = env.str("RESEND_API_KEY", default=None)
 CORS_ALLOW_CREDENTIALS = True
 
 # Application definition
