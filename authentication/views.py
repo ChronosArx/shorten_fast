@@ -153,6 +153,11 @@ class GenerateAccessToken(APIView):
 class CheckAuth(APIView):
     serializer_class = None
 
+    @extend_schema(
+        description="Este endpoint sirve para comprobar que el usuario actual está logueado.\n "
+        "Se espera que el fetch incluya credenciales y el endpoint confirmara que el refresh token se encuentre\n "
+        "en las cookies y que no haya expirado se retornara un valor booleano."
+    )
     def get(self, request):
         try:
             token = request.COOKIES.get("refresh_token")
