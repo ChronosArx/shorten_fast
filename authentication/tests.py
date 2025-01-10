@@ -171,7 +171,7 @@ class AuthTest(APITestCase):
         response = self.client.get(reverse("check_auth"))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_data = response.json()
-        self.assertTrue(response_data.get("IsLogged"))
+        self.assertTrue(response_data.get("isLogged"))
 
     @patch("authentication.views.send_confirm_email")
     def test_check_auth_incorrect(self, mock_send_confirm_email):
