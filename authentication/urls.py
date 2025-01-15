@@ -8,6 +8,6 @@ urlpatterns = [
     path(
         "auth/new_access_token/", GenerateAccessToken.as_view(), name="new_access_token"
     ),
-    path("auth/check_auth", CheckAuth.as_view(), name="check_auth"),
+    path("auth/check_auth/", CheckAuth.as_view(), name="check_auth"),
     path("auth/confirm_email/", ConfirmEmail.as_view(), name="confirm_email"),
 ]
