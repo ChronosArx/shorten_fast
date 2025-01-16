@@ -86,7 +86,7 @@ class LogIn(generics.GenericAPIView):
                 value=str(refresh_token),
                 max_age=timedelta(days=7),
                 httponly=True,
-                samesite=None,
+                samesite="None",
                 secure=True,
             )
 
