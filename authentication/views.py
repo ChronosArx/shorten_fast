@@ -152,6 +152,7 @@ class GenerateAccessToken(APIView):
 @extend_schema(tags=["Authentication"], auth=[])
 class CheckAuth(APIView):
     serializer_class = None
+    permission_classes = [AllowAny]
 
     @extend_schema(
         description="Este endpoint sirve para comprobar que el usuario actual está logueado.\n "
