@@ -4,20 +4,19 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('shorten', '0002_shortlink_user_id'),
+        ("shorten", "0002_shortlink_user_id"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='shortlink',
-            name='original_url',
+            model_name="shortlink",
+            name="original_url",
             field=models.URLField(),
         ),
         migrations.AlterField(
-            model_name='shortlink',
-            name='short_url',
+            model_name="shortlink",
+            name="short_url",
             field=models.URLField(),
         ),
     ]

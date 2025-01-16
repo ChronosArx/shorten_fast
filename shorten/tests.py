@@ -7,7 +7,6 @@ from authentication.models import CodeToConfirm
 
 # Create your tests here.
 class ShortenTests(APITestCase):
-
     def setUp(self):
         self.register_data = {
             "username": "david",

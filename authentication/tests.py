@@ -47,7 +47,6 @@ class AuthTest(APITestCase):
 
     @patch("authentication.views.send_confirm_email")
     def test_register(self, mock_send_confirm_email):
-
         mock_send_confirm_email.return_value = None
 
         response = self.client.post(reverse("register"), self.register_data)
@@ -62,7 +61,6 @@ class AuthTest(APITestCase):
         self.assertEqual(code.code, self.code)
 
     def test_register_incorrect(self):
-
         response = self.client.post(reverse("register"), self.register_data_bad_email)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
@@ -80,7 +78,6 @@ class AuthTest(APITestCase):
 
     @patch("authentication.views.send_confirm_email")
     def test_confirm_email(self, mock_send_confirm_email):
-
         mock_send_confirm_email.return_value = None
         response = self.client.post(reverse("register"), self.register_data)
         code = CodeToConfirm.objects.first().code
@@ -101,7 +98,6 @@ class AuthTest(APITestCase):
 
     @patch("authentication.views.send_confirm_email")
     def test_login(self, mock_send_confirm_email):
-
         mock_send_confirm_email.return_value = None
 
         self.client.post(reverse("register"), self.register_data)
