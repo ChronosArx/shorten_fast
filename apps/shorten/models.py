@@ -1,0 +1,17 @@
+from django.db import models
+from django.conf import settings
+
+
+# Create your models here.
+class ShortLink(models.Model):
+    title = models.CharField(max_length=200, blank=True, null=True)
+    original_url = models.URLField()
+    short_url = models.URLField()
+    code = models.CharField(max_length=6, unique=True)
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        blank=True,
+        null=True,
+        on_delete=models.CASCADE,
+    )

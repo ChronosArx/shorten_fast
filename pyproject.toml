@@ -1,0 +1,27 @@
+[project]
+name = "shorten-fast"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "django-cors-headers>=4.9.0",
+    "django-environ>=0.13.0",
+    "djangorestframework>=3.17.1",
+    "djangorestframework-simplejwt>=5.5.1",
+    "drf-spectacular>=0.29.0",
+    "gunicorn>=26.0.0",
+    "segno>=1.6.6",
+]
+
+[dependency-groups]
+dev = [
+    "djangorestframework-stubs[compatible-mypy]>=3.16.9",
+    "pytest-django>=4.12.0",
+    "pytest-mock>=3.15.0",
+    "ruff>=0.15.12",
+]
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "config.settings.dev"
+python_files = "tests.py test_*.py *_tests.py"
