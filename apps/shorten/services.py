@@ -3,6 +3,7 @@ import io
 import secrets
 
 from django.conf import settings
+from django.db.models import F
 import segno
 
 from .models import ShortLink
@@ -26,6 +27,17 @@ def create_short_link_service(custom_length: int = 6):
 
     full_url = format_short_url(code)
     return full_url, code
+
+def get_original_url_and_increment_click(code):
+    shortlink = ShortLink.objects.filter(code=code).first()
+    if not shortlink:
+        return None
+    
+    original_url = shortlink.original_url
+    shortlink.clicks = F('clicks') + 1
+    shortlink.save(update_fields=['clicks'])
+    
+    return original_url
 
 
 def generate_qr(url: str):
