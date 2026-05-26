@@ -8,6 +8,7 @@ class ShortLink(models.Model):
     original_url = models.URLField()
     short_url = models.URLField()
     code = models.CharField(max_length=6, unique=True)
+    clicks = models.IntegerField(default=0)
 
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
