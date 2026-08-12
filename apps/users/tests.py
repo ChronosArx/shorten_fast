@@ -1,10 +1,21 @@
 import pytest
 from django.urls import reverse
 from rest_framework import status
+from .models import User
 
 
 @pytest.mark.django_db
-def test_register(api_client, register_data):
+def test_create_user():
+    user = User.objects.create_user(
+        email="test@test.com",
+        password="testpassword",
+    )
+    assert user.email == "test@test.com"
+    assert user.check_password("testpassword")
+
+
+@pytest.mark.django_db
+def test_api_register(api_client, register_data):
     response = api_client.post(reverse("register"), register_data)
     assert response.status_code == status.HTTP_201_CREATED
 
@@ -14,21 +25,13 @@ def test_register(api_client, register_data):
 
 
 @pytest.mark.django_db
-def test_register_incorrect(api_client):
+def test_api_register_incorrect(api_client):
     bad_email_data = {
         "username": "testuser",
         "email": "bad-email",
         "password": "testpass123",
     }
     response = api_client.post(reverse("register"), bad_email_data)
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
-
-    bad_username_data = {
-        "username": "",
-        "email": "test@example.com",
-        "password": "testpass123",
-    }
-    response = api_client.post(reverse("register"), bad_username_data)
     assert response.status_code == status.HTTP_400_BAD_REQUEST
 
     bad_password_data = {
@@ -41,7 +44,7 @@ def test_register_incorrect(api_client):
 
 
 @pytest.mark.django_db
-def test_login(api_client):
+def test_api_login(api_client):
     register_data = {
         "username": "loginuser",
         "email": "login@example.com",
@@ -62,7 +65,7 @@ def test_login(api_client):
 
 
 @pytest.mark.django_db
-def test_login_incorrect(api_client):
+def test_api_login_incorrect(api_client):
     login_data = {
         "email": "nonexistent@example.com",
         "password": "wrongpassword",
