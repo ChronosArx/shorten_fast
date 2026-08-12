@@ -2,7 +2,6 @@ from django.db import models
 from django.conf import settings
 
 
-# Create your models here.
 class ShortLink(models.Model):
     title = models.CharField(max_length=200, blank=True, null=True)
     original_url = models.URLField()

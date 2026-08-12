@@ -13,8 +13,12 @@ from drf_spectacular.utils import (
 )
 
 from .serializers import ShortLinkSerializer
-from .models import ShortLink
-from .services import generate_qr, create_short_link_service, get_original_url_and_increment_click
+from apps.links.models import ShortLink
+from apps.links.services import (
+    generate_qr,
+    create_short_link_service,
+    get_original_url_and_increment_click,
+)
 from .permissions import IsAuthenticatedOrCreate
 
 
@@ -35,7 +39,7 @@ from .permissions import IsAuthenticatedOrCreate
 )
 class Redirects(APIView):
     permission_classes = [AllowAny]
-    
+
     def get(self, request, code):
         original_url = get_original_url_and_increment_click(code=code)
 
@@ -43,8 +47,9 @@ class Redirects(APIView):
             return Response(
                 {"detail": "Page not Found"}, status=status.HTTP_404_NOT_FOUND
             )
-        
+
         return redirect(original_url)
+
 
 id_param = OpenApiParameter(
     name="id",
