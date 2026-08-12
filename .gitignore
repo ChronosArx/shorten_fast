@@ -1,5 +1,7 @@
-/venv
+/.venv
 **/__pycache__
 *.env
 *.sqlite3
 .ruff_cache
+/static
+/.pytest_cache
