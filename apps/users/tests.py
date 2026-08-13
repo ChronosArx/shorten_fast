@@ -16,7 +16,7 @@ def test_create_user():
 
 @pytest.mark.django_db
 def test_api_register(api_client, register_data):
-    response = api_client.post(reverse("register"), register_data)
+    response = api_client.post(reverse("api_register"), register_data)
     assert response.status_code == status.HTTP_201_CREATED
 
     response_data = response.json()
@@ -31,7 +31,7 @@ def test_api_register_incorrect(api_client):
         "email": "bad-email",
         "password": "testpass123",
     }
-    response = api_client.post(reverse("register"), bad_email_data)
+    response = api_client.post(reverse("api_register"), bad_email_data)
     assert response.status_code == status.HTTP_400_BAD_REQUEST
 
     bad_password_data = {
@@ -39,7 +39,7 @@ def test_api_register_incorrect(api_client):
         "email": "test@example.com",
         "password": "",
     }
-    response = api_client.post(reverse("register"), bad_password_data)
+    response = api_client.post(reverse("api_register"), bad_password_data)
     assert response.status_code == status.HTTP_400_BAD_REQUEST
 
 
@@ -50,13 +50,13 @@ def test_api_login(api_client):
         "email": "login@example.com",
         "password": "loginpass123",
     }
-    api_client.post(reverse("register"), register_data)
+    api_client.post(reverse("api_register"), register_data)
 
     login_data = {
         "email": "login@example.com",
         "password": "loginpass123",
     }
-    response = api_client.post(reverse("token_obtain_pair"), login_data)
+    response = api_client.post(reverse("api_token_obtain_pair"), login_data)
     response_data = response.json()
 
     assert response.status_code == status.HTTP_200_OK
@@ -70,7 +70,7 @@ def test_api_login_incorrect(api_client):
         "email": "nonexistent@example.com",
         "password": "wrongpassword",
     }
-    response = api_client.post(reverse("token_obtain_pair"), login_data)
+    response = api_client.post(reverse("api_token_obtain_pair"), login_data)
     response_data = response.json()
 
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
