@@ -13,7 +13,7 @@ from drf_spectacular.utils import (
 )
 
 from .serializers import ShortLinkSerializer
-from apps.links.models import ShortLink
+from apps.links.models import Link
 from apps.links.services import (
     generate_qr,
     create_short_link_service,
@@ -92,8 +92,8 @@ class ShortLinkViewSet(
     def get_queryset(self):
         user = self.request.user
         if user.is_anonymous:
-            return ShortLink.objects.none()
-        return ShortLink.objects.filter(user=user)
+            return Link.objects.none()
+        return Link.objects.filter(user=user)
 
     def perform_create(self, serializer):
         short_url, code = create_short_link_service()

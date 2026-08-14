@@ -7,9 +7,12 @@ from rest_framework import status
 def test_short_link(authenticated_client):
     url = reverse("shortlink-list")
 
-    response = authenticated_client.post(url, data={
-        "original_url": "https://example.com/example",
-    })
+    response = authenticated_client.post(
+        url,
+        data={
+            "original_url": "https://example.com/example",
+        },
+    )
     response_data = response.json()
     assert response.status_code == status.HTTP_201_CREATED
     assert "id" in response_data
@@ -22,10 +25,13 @@ def test_short_link(authenticated_client):
     assert response_data["code"].isalnum()
     assert len(response_data["code"]) == 6
 
-    response = authenticated_client.post(url, data={
-        "title": "Test title",
-        "original_url": "https://example.com/example",
-    })
+    response = authenticated_client.post(
+        url,
+        data={
+            "title": "Test title",
+            "original_url": "https://example.com/example",
+        },
+    )
     response_data = response.json()
     assert response.status_code == status.HTTP_201_CREATED
     assert "id" in response_data
@@ -54,14 +60,20 @@ def test_get_links(authenticated_client):
     assert response_empty.status_code == status.HTTP_200_OK
     assert len(response_empty.json()) == 0
 
-    authenticated_client.post(url, data={
-        "title": "Link 1",
-        "original_url": "https://example.com/1",
-    })
-    authenticated_client.post(url, data={
-        "title": "Link 2",
-        "original_url": "https://example.com/2",
-    })
+    authenticated_client.post(
+        url,
+        data={
+            "title": "Link 1",
+            "original_url": "https://example.com/1",
+        },
+    )
+    authenticated_client.post(
+        url,
+        data={
+            "title": "Link 2",
+            "original_url": "https://example.com/2",
+        },
+    )
 
     response_items = authenticated_client.get(url)
     assert response_items.status_code == status.HTTP_200_OK
@@ -139,23 +151,32 @@ def test_update_link(authenticated_client):
 def test_update_link_incorrect(authenticated_client, api_client):
     url_update = reverse("shortlink-detail", args=[1])
 
-    response = api_client.put(url_update, data={
-        "title": "Test",
-        "original_url": "https://example.com",
-    })
+    response = api_client.put(
+        url_update,
+        data={
+            "title": "Test",
+            "original_url": "https://example.com",
+        },
+    )
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
-    response = authenticated_client.put(url_update, data={
-        "title": "Test",
-        "original_url": "https://example.com",
-    })
+    response = authenticated_client.put(
+        url_update,
+        data={
+            "title": "Test",
+            "original_url": "https://example.com",
+        },
+    )
     assert response.status_code == status.HTTP_404_NOT_FOUND
 
     url_post = reverse("shortlink-list")
-    authenticated_client.post(url_post, data={
-        "title": "Test",
-        "original_url": "https://example.com",
-    })
+    authenticated_client.post(
+        url_post,
+        data={
+            "title": "Test",
+            "original_url": "https://example.com",
+        },
+    )
 
     response = authenticated_client.put(url_update)
     assert response.status_code == status.HTTP_400_BAD_REQUEST
@@ -215,7 +236,8 @@ def test_get_qr(authenticated_client):
     url = reverse("shortlink-get-qr")
 
     response = authenticated_client.post(
-        url, data={"original_url": "https://example.com"},
+        url,
+        data={"original_url": "https://example.com"},
     )
 
     assert response.status_code == status.HTTP_200_OK
@@ -227,7 +249,8 @@ def test_get_qr_incorrect(api_client):
     url = reverse("shortlink-get-qr")
 
     response = api_client.post(
-        url, data={"original_url": "no-is-url"},
+        url,
+        data={"original_url": "no-is-url"},
     )
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST

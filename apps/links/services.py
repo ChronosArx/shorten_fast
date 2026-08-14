@@ -6,7 +6,7 @@ from django.conf import settings
 from django.db.models import F
 import segno
 
-from .models import ShortLink
+from .models import Link
 
 
 def generate_random_code(length: int = 6) -> str:
@@ -22,21 +22,22 @@ def format_short_url(code: str) -> str:
 def create_short_link_service(custom_length: int = 6):
     while True:
         code = generate_random_code(length=custom_length)
-        if not ShortLink.objects.filter(code=code).exists():
+        if not Link.objects.filter(code=code).exists():
             break
 
     full_url = format_short_url(code)
     return full_url, code
 
+
 def get_original_url_and_increment_click(code):
-    shortlink = ShortLink.objects.filter(code=code).first()
+    shortlink = Link.objects.filter(code=code).first()
     if not shortlink:
         return None
-    
+
     original_url = shortlink.original_url
-    shortlink.clicks = F('clicks') + 1
-    shortlink.save(update_fields=['clicks'])
-    
+    shortlink.clicks = F("clicks") + 1
+    shortlink.save(update_fields=["clicks"])
+
     return original_url
 
 
