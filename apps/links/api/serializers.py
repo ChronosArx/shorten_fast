@@ -6,4 +6,4 @@ class ShortLinkSerializer(serializers.ModelSerializer):
     class Meta:
         model = Link
         fields = "__all__"
-        read_only_fields = ["short_url", "code", "user"]
+        read_only_fields = ["id", "short_url", "code", "user"]

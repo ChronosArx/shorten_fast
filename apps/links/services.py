@@ -7,6 +7,7 @@ from django.db.models import F
 import segno
 
 from .models import Link
+from apps.users.models import User
 
 
 def generate_random_code(length: int = 6) -> str:
@@ -19,24 +20,32 @@ def format_short_url(code: str) -> str:
     return f"{domain}/{code}"
 
 
-def create_short_link_service(custom_length: int = 6):
+def create_short_link(
+    title: str | None,
+    original_url: str,
+    user: User | None = None,
+    custom_length: int = 6,
+) -> Link:
     while True:
         code = generate_random_code(length=custom_length)
         if not Link.objects.filter(code=code).exists():
             break
 
     full_url = format_short_url(code)
-    return full_url, code
+
+    link = Link.objects.create(
+        title=title, original_url=original_url, short_url=full_url, code=code, user=user
+    )
+    return link
 
 
 def get_original_url_and_increment_click(code):
-    shortlink = Link.objects.filter(code=code).first()
-    if not shortlink:
+    link = Link.objects.filter(code=code).first()
+    if not link:
         return None
-
-    original_url = shortlink.original_url
-    shortlink.clicks = F("clicks") + 1
-    shortlink.save(update_fields=["clicks"])
+    original_url = link.original_url
+    link.clicks = F("clicks") + 1
+    link.save(update_fields=["clicks"])
 
     return original_url
 

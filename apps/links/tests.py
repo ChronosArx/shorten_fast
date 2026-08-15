@@ -104,7 +104,7 @@ def test_get_link(authenticated_client):
     assert response.status_code == status.HTTP_200_OK
     assert "id" in response_data
     assert "title" in response_data
-    assert response_data["title"] is not None
+    assert response_data["title"] == "Test"
     assert "original_url" in response_data
     assert "short_url" in response_data
     assert "code" in response_data
@@ -215,7 +215,8 @@ def test_redirect(authenticated_client):
         url_post,
         data={"title": "Redirect Test", "original_url": "https://example.com"},
     )
-    code = response_post.json()["code"]
+    response_data = response_post.json()
+    code = response_data["code"]
 
     url = reverse("redirects", args=[code])
     response = authenticated_client.get(url)

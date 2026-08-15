@@ -1,5 +1,8 @@
+from typing import Any, cast
+
 from django.http.response import FileResponse
 from django.shortcuts import redirect
+from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
 from rest_framework import viewsets, status
@@ -7,22 +10,20 @@ from rest_framework.views import APIView
 from rest_framework.decorators import action
 from drf_spectacular.utils import (
     extend_schema,
-    extend_schema_view,
     OpenApiResponse,
-    OpenApiParameter,
 )
 
 from .serializers import ShortLinkSerializer
 from apps.links.models import Link
 from apps.links.services import (
     generate_qr,
-    create_short_link_service,
+    create_short_link,
     get_original_url_and_increment_click,
 )
 from .permissions import IsAuthenticatedOrCreate
+from apps.users.models import User
 
 
-# Create your views here.
 @extend_schema(
     description="Este es el punto de entrada para redirigir todos los links acortados.",
     tags=["Redirects"],
@@ -51,36 +52,6 @@ class Redirects(APIView):
         return redirect(original_url)
 
 
-id_param = OpenApiParameter(
-    name="id",
-    type=int,
-    location="path",
-    description="ID del ShortLink",
-    required=True,
-)
-
-
-@extend_schema_view(
-    list=extend_schema(
-        description="Se utiliza para obtener una lista de todos los links acortados del usuario",
-    ),
-    create=extend_schema(
-        description="Solo los usuarios registrados pueden enviar un titulo para la creación del link acortado.",
-        responses=ShortLinkSerializer,
-    ),
-    retrieve=extend_schema(
-        description="Para obtener los detalles de un link en específico se necesita el id como parámetro.",
-        parameters=[id_param],
-    ),
-    update=extend_schema(
-        description="Para actualizar de un link en específico se necesita el id como parámetro y los datos a actualizar.",
-        parameters=[id_param],
-    ),
-    destroy=extend_schema(
-        description="Para la eliminación de un link es necesario pasar el id como parámetro.",
-        parameters=[id_param],
-    ),
-)
 @extend_schema(tags=["Shortlink"])
 class ShortLinkViewSet(
     viewsets.ModelViewSet,
@@ -95,23 +66,18 @@ class ShortLinkViewSet(
             return Link.objects.none()
         return Link.objects.filter(user=user)
 
-    def perform_create(self, serializer):
-        short_url, code = create_short_link_service()
-        user = None if self.request.user.is_anonymous else self.request.user
-        serializer.save(code=code, short_url=short_url, user=user)
+    def create(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        original_url = serializer.validated_data["original_url"]
+        title = serializer.validated_data.get("title")
+        user = cast(User, request.user) if request.user.is_authenticated else None
+        link = create_short_link(title=title, original_url=original_url, user=user)
+        serializer = self.get_serializer(link)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     @extend_schema(
-        description="Este endpoint regresa un código qr en formato png.",
-        responses={
-            status.HTTP_200_OK: OpenApiResponse(
-                response={
-                    "application/json": {
-                        "type": "image/png",
-                    }
-                },
-                description="Se creó exitosamente el código qr",
-            )
-        },
+        description="Genera un código QR PNG a partir de una URL.",
     )
     @action(methods=["POST"], url_path="get-qr", detail=False, url_name="get-qr")
     def get_qrcode(self, request) -> FileResponse:
