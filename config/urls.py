@@ -12,9 +12,6 @@ urlpatterns = [
     path("<str:code>", Redirects.as_view(), name="redirects"),
     # Urls Admin
     path("admin/", admin.site.urls),
-    # Urls for Web
-    path("accounts/", include("apps.users.urls")),
-    path("", include("apps.links.urls")),
     # Urls for API
     path("api/", include("apps.links.api.urls")),
     path("api/", include("apps.users.api.urls")),
