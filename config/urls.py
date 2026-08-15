@@ -13,8 +13,8 @@ urlpatterns = [
     # Urls Admin
     path("admin/", admin.site.urls),
     # Urls for API
-    path("api/", include("apps.links.api.urls")),
-    path("api/", include("apps.users.api.urls")),
+    path("api/", include("apps.links.urls")),
+    path("api/", include("apps.users.urls")),
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
     path(
         "api/docs/",
