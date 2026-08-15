@@ -1,13 +1,11 @@
-from django.contrib.auth.views import LogoutView
 from django.urls import path
 
-from .views import CustomLoginView, ProfileView, UserRegisterView
+from .views import Register, CustomTokenObtainPairView, CustomTokenRefreshView
 
 app_name = "users"
 
 urlpatterns = [
-    path("register/", UserRegisterView.as_view(), name="register"),
-    path("login/", CustomLoginView.as_view(), name="login"),
-    path("logout/", LogoutView.as_view(), name="logout"),
-    path("profile/", ProfileView.as_view(), name="profile"),
+    path("auth/register/", Register.as_view(), name="register"),
+    path("auth/login/", CustomTokenObtainPairView.as_view(), name="token_obtain_pair"),
+    path("auth/refresh/", CustomTokenRefreshView.as_view(), name="token_refresh"),
 ]

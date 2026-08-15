@@ -1,22 +1,50 @@
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.auth.views import LoginView
-from django.urls import reverse_lazy
-from django.views.generic import CreateView, TemplateView
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from rest_framework_simplejwt.tokens import RefreshToken
+from drf_spectacular.utils import extend_schema
+from rest_framework.permissions import AllowAny
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
-from .forms import CustomAuthenticationForm, UserRegisterForm
-
-
-class UserRegisterView(CreateView):
-    form_class = UserRegisterForm
-    template_name = "register.html"
-    success_url = reverse_lazy("users:login")
+from .serializers import UserRegisterSerializer
+from .docs import response_access_token
 
 
-class CustomLoginView(LoginView):
-    form_class = CustomAuthenticationForm
-    template_name = "login.html"
-    redirect_authenticated_user = True
+class Register(APIView):
+    permission_classes = [AllowAny]
+
+    @extend_schema(
+        tags=["Authentication"],
+        summary="Registro de nuevo usuario",
+        description="Crea una cuenta en la plataforma y devuelve los tokens JWT iniciales para autenticación.",
+        responses={status.HTTP_201_CREATED: response_access_token},
+        auth=[],
+    )
+    def post(self, request, *args, **kwargs):
+
+        serializer = UserRegisterSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        user = serializer.save()
+        refresh_token = RefreshToken.for_user(user)
+
+        response_data = {
+            "access": str(refresh_token.access_token),
+            "refresh": str(refresh_token),
+            "token_type": "Bearer",
+        }
+
+        return Response(
+            data=response_data,
+            status=status.HTTP_201_CREATED,
+        )
 
 
-class ProfileView(LoginRequiredMixin, TemplateView):
-    template_name = "profile.html"
+@extend_schema(tags=["Authentication"], auth=[])
+class CustomTokenObtainPairView(TokenObtainPairView):
+    pass
+
+
+@extend_schema(tags=["Authentication"], auth=[])
+class CustomTokenRefreshView(TokenRefreshView):
+    pass
