@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="halloween">
+<html lang="en" data-theme="dark">
 
 <head>
     <meta charset=" UTF-8">
@@ -12,8 +12,40 @@
 </head>
 
 <body>
-    {% block content %}
-    {% endblock %}
+    <div class="min-h-screen bg-base-200">
+        <header>
+            <nav class="navbar bg-base- shadow-sm">
+                <div class="flex-1">
+                    <a href="{% url 'links:home' %}" class="btn btn-ghost text-xl">ShortenFast</a>
+                </div>
+                <div class="flex-none">
+                    <ul class="menu menu-horizontal px-1">
+                        {% if user.is_authenticated %}
+                        <li>
+                            <form method="post" action="{% url 'users:logout' %}">
+                                {% csrf_token %}
+                                <button type="submit">
+                                    LogOut
+                                </button>
+                            </form>
+                        </li>
+                        {% endif %}
+
+                        <li>
+                            <a href="{% url 'users:register' %}">SignUp</a>
+                        </li>
+                        <li>
+                            <a href="{% url 'users:login' %}">Login</a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+        </header>
+        <main>
+            {% block content %}
+            {% endblock %}
+        </main>
+    </div>
 </body>
 
 </html>
