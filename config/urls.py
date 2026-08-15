@@ -8,9 +8,13 @@ from apps.links.api.views import Redirects
 
 
 urlpatterns = [
+    # Urls redirect
+    path("<str:code>", Redirects.as_view(), name="redirects"),
+    # Urls Admin
     path("admin/", admin.site.urls),
     # Urls for Web
     path("accounts/", include("apps.users.urls")),
+    path("", include("apps.links.urls")),
     # Urls for API
     path("api/", include("apps.links.api.urls")),
     path("api/", include("apps.users.api.urls")),
@@ -20,5 +24,7 @@ urlpatterns = [
         SpectacularSwaggerView.as_view(url_name="schema"),
         name="swagger-ui",
     ),
-    path("<str:code>", Redirects.as_view(), name="redirects"),
-] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+]
+
+if settings.DEBUG:
+    urlpatterns + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
