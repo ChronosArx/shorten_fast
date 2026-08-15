@@ -4,7 +4,7 @@ from django.conf.urls.static import static
 from django.urls import path, include
 from drf_spectacular.views import SpectacularSwaggerView, SpectacularAPIView
 
-from apps.links.api.views import Redirects
+from apps.links.views import Redirects
 
 
 urlpatterns = [

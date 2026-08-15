@@ -43,7 +43,7 @@ def short_link_with_title_data():
 @pytest.fixture
 def registered_client(register_data):
     client = APIClient()
-    url = reverse("api:user_register")
+    url = reverse("users:register")
     response = client.post(url, register_data)
     response_data = response.json()
     return client, response_data.get("access"), response_data.get("refresh")
