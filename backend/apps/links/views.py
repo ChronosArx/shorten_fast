@@ -48,8 +48,17 @@ class Redirects(APIView):
             ),
         },
     )
-    def get(self, request, code):
-        original_url = get_original_url_and_increment_click(code=code)
+    def get(self, request: Request, code):
+        ip = request.headers.get("REMOTE_ADDR")
+        user_agent = request.headers.get("HTTP_USER_AGENT")
+        referrer = request.headers.get("HTTP_REFERER")
+
+        original_url = get_original_url_and_increment_click(
+            code=code,
+            referrer=referrer,
+            user_agent=user_agent,
+            ip=ip,
+        )
 
         if not original_url:
             return Response(

@@ -3,10 +3,11 @@ import io
 import secrets
 
 from django.conf import settings
-from django.db.models import F
+from django.utils import timezone
+from ua_parser import parse
 import segno
 
-from .models import Link
+from .models import Click, Link
 from apps.users.models import User
 
 
@@ -39,15 +40,32 @@ def create_short_link(
     return link
 
 
-def get_original_url_and_increment_click(code):
+def get_original_url_and_increment_click(
+    code: str,
+    referrer: str | None = None,
+    user_agent: str | None = None,
+    ip: str | None = None,
+):
     link = Link.objects.filter(code=code).first()
     if not link:
         return None
-    original_url = link.original_url
-    link.clicks = F("clicks") + 1
-    link.save(update_fields=["clicks"])
 
-    return original_url
+    parsed_user_agent = parse(user_agent) if user_agent else None
+
+    Click.objects.create(
+        link_id=link,
+        timestamp=timezone.now().date(),
+        ip=ip,
+        referrer=referrer,
+        browser=parsed_user_agent.user_agent.family
+        if parsed_user_agent and parsed_user_agent.user_agent
+        else None,
+        device=parsed_user_agent.device.family
+        if parsed_user_agent and parsed_user_agent.device
+        else None,
+    )
+
+    return link.original_url
 
 
 def generate_qr(url: str):
