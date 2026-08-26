@@ -88,8 +88,11 @@ class ShortLinkViewSet(
         serializer.is_valid(raise_exception=True)
         original_url = serializer.validated_data["original_url"]
         title = serializer.validated_data.get("title")
+        expires_at = serializer.validated_data.get("expires_at")
         user = cast(User, request.user) if request.user.is_authenticated else None
-        link = create_short_link(title=title, original_url=original_url, user=user)
+        link = create_short_link(
+            title=title, original_url=original_url, user=user, expires_at=expires_at
+        )
         serializer = self.get_serializer(link)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 

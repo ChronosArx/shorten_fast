@@ -26,6 +26,7 @@ def create_short_link(
     original_url: str,
     user: User | None = None,
     custom_length: int = 6,
+    expires_at=None,
 ) -> Link:
     while True:
         code = generate_random_code(length=custom_length)
@@ -35,7 +36,12 @@ def create_short_link(
     full_url = format_short_url(code)
 
     link = Link.objects.create(
-        title=title, original_url=original_url, short_url=full_url, code=code, user=user
+        title=title,
+        original_url=original_url,
+        short_url=full_url,
+        code=code,
+        user=user,
+        expires_at=expires_at,
     )
     return link
 
@@ -50,19 +56,27 @@ def get_original_url_and_increment_click(
     if not link:
         return None
 
-    parsed_user_agent = parse(user_agent) if user_agent else None
+    if link.expires_at and timezone.now() > link.expires_at:
+        return None
 
+    parsed_user_agent = parse(user_agent) if user_agent else None
+    browser = (
+        parsed_user_agent.user_agent.family
+        if parsed_user_agent and parsed_user_agent.user_agent
+        else None
+    )
+    device = (
+        parsed_user_agent.device.family
+        if parsed_user_agent and parsed_user_agent.device
+        else None
+    )
     Click.objects.create(
         link_id=link,
         timestamp=timezone.now().date(),
         ip=ip,
         referrer=referrer,
-        browser=parsed_user_agent.user_agent.family
-        if parsed_user_agent and parsed_user_agent.user_agent
-        else None,
-        device=parsed_user_agent.device.family
-        if parsed_user_agent and parsed_user_agent.device
-        else None,
+        browser=browser,
+        device=device,
     )
 
     return link.original_url

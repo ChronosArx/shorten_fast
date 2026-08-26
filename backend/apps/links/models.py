@@ -13,6 +13,7 @@ class Link(models.Model):
         null=True,
         on_delete=models.CASCADE,
     )
+    expires_at = models.DateTimeField(null=True, blank=True)
 
 
 class Click(models.Model):
