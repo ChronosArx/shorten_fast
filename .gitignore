@@ -13,6 +13,7 @@
 ----------
 # Typescript / Frontend
 ----------
+# Logs
 logs
 *.log
 npm-debug.log*
@@ -29,4 +30,12 @@ dist-ssr
 ---------
 # Editors
 ---------
-/.vscode
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
