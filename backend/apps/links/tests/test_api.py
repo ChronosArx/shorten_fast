@@ -1,8 +1,5 @@
-from datetime import timedelta
-
 import pytest
 from django.urls import reverse
-from django.utils import timezone
 from rest_framework import status
 
 from apps.links.models import Link
@@ -29,8 +26,8 @@ def test_short_link(authenticated_client):
     assert "code" in response_data
     assert response_data["code"].isalnum()
     assert len(response_data["code"]) == 6
-    assert "expires_at" in response_data
-    assert response_data["expires_at"] is None
+    assert "clicks" in response_data
+    assert response_data["clicks"] == 0
 
     response = authenticated_client.post(
         url,
@@ -50,8 +47,7 @@ def test_short_link(authenticated_client):
     assert "code" in response_data
     assert response_data["code"].isalnum()
     assert len(response_data["code"]) == 6
-    assert "expires_at" in response_data
-    assert response_data["expires_at"] is None
+    assert response_data["clicks"] == 0
 
 
 @pytest.mark.django_db
@@ -118,8 +114,7 @@ def test_get_link(authenticated_client):
     assert "short_url" in response_data
     assert "code" in response_data
     assert len(response_data["code"]) == 6
-    assert "expires_at" in response_data
-    assert response_data["expires_at"] is None
+    assert response_data["clicks"] == 0
 
 
 @pytest.mark.django_db
@@ -142,7 +137,6 @@ def test_update_link(authenticated_client):
     )
     short_link = response.json()
     short_link["title"] = "Nuevo titulo"
-    short_link["expires_at"] = (timezone.now() + timedelta(days=7)).isoformat()
 
     url_update = reverse("shortlink-detail", args=[short_link["id"]])
     response = authenticated_client.put(url_update, data=short_link)
@@ -157,30 +151,7 @@ def test_update_link(authenticated_client):
     assert "short_url" in response_data
     assert "code" in response_data
     assert len(response_data["code"]) == 6
-    assert "expires_at" in response_data
-    assert response_data["expires_at"] is not None
-
-
-@pytest.mark.django_db
-def test_update_link_with_past_expiration(authenticated_client):
-    url_post = reverse("shortlink-list")
-    response_post = authenticated_client.post(
-        url_post,
-        data={"title": "Test", "original_url": "https://example.com"},
-    )
-    link_id = response_post.json()["id"]
-
-    url_update = reverse("shortlink-detail", args=[link_id])
-    response = authenticated_client.put(
-        url_update,
-        data={
-            "title": "Test",
-            "original_url": "https://example.com",
-            "expires_at": (timezone.now() - timedelta(days=1)).isoformat(),
-        },
-    )
-
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response_data["clicks"] == 0
 
 
 @pytest.mark.django_db
@@ -259,6 +230,9 @@ def test_redirect(authenticated_client):
 
     assert response.status_code == status.HTTP_302_FOUND
 
+    link = Link.objects.get(code=code)
+    assert link.clicks == 1
+
 
 @pytest.mark.django_db
 def test_redirect_incorrect(authenticated_client):
@@ -269,58 +243,19 @@ def test_redirect_incorrect(authenticated_client):
 
 
 @pytest.mark.django_db
-def test_create_link_with_expiration(authenticated_client):
+def test_clicks_is_read_only(authenticated_client):
     url = reverse("shortlink-list")
-    expires_at = timezone.now() + timedelta(days=7)
 
     response = authenticated_client.post(
         url,
-        data={
-            "original_url": "https://example.com/example",
-            "expires_at": expires_at.isoformat(),
-        },
+        data={"original_url": "https://example.com", "clicks": 99},
     )
 
     assert response.status_code == status.HTTP_201_CREATED
-    response_data = response.json()
-    assert response_data["expires_at"] is not None
+    assert response.json()["clicks"] == 0
 
-    link = Link.objects.get(id=response_data["id"])
-    assert link.expires_at is not None
-
-
-@pytest.mark.django_db
-def test_create_link_with_expiration_anonymous_ignored(api_client):
-    url = reverse("shortlink-list")
-    expires_at = timezone.now() + timedelta(days=7)
-
-    response = api_client.post(
-        url,
-        data={
-            "original_url": "https://example.com/example",
-            "expires_at": expires_at.isoformat(),
-        },
-    )
-
-    assert response.status_code == status.HTTP_201_CREATED
-    response_data = response.json()
-    assert response_data["expires_at"] is None
-
-
-@pytest.mark.django_db
-def test_create_link_with_past_expiration(authenticated_client):
-    url = reverse("shortlink-list")
-    expires_at = timezone.now() - timedelta(days=1)
-
-    response = authenticated_client.post(
-        url,
-        data={
-            "original_url": "https://example.com/example",
-            "expires_at": expires_at.isoformat(),
-        },
-    )
-
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    link = Link.objects.get(id=response.json()["id"])
+    assert link.clicks == 0
 
 
 @pytest.mark.django_db

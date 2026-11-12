@@ -7,20 +7,10 @@ class Link(models.Model):
     original_url = models.URLField()
     short_url = models.URLField()
     code = models.CharField(max_length=6, unique=True)
+    clicks = models.PositiveIntegerField(default=0)
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         blank=True,
         null=True,
         on_delete=models.CASCADE,
     )
-    expires_at = models.DateTimeField(null=True, blank=True)
-
-
-class Click(models.Model):
-    link_id = models.ForeignKey(Link, on_delete=models.CASCADE, related_name="clicks")
-    timestamp = models.DateField()
-    ip = models.GenericIPAddressField(null=True, blank=True)
-    referrer = models.URLField(null=True, blank=True)
-    browser = models.CharField(max_length=100, null=True, blank=True)
-    device = models.CharField(max_length=100, null=True, blank=True)
-    country = models.CharField(max_length=100, null=True, blank=True)
