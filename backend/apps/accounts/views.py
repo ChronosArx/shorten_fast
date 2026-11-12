@@ -1,12 +1,14 @@
-from drf_spectacular.utils import extend_schema
+from drf_spectacular.utils import OpenApiResponse, extend_schema
 from rest_framework import status
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 from .serializers import (
+    LogoutSerializer,
     TokenObtainPairResponseSerializer,
     TokenPairResponseSerializer,
     TokenRefreshResponseSerializer,
@@ -42,6 +44,45 @@ class Register(APIView):
         return Response(
             data=response_data,
             status=status.HTTP_201_CREATED,
+        )
+
+
+class LogoutView(APIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = LogoutSerializer
+
+    @extend_schema(
+        tags=["Auth"],
+        summary="Cerrar sesión",
+        description="Revoca el refresh token recibido para que no pueda volver a usarse.",
+        request=LogoutSerializer,
+        responses={
+            status.HTTP_200_OK: OpenApiResponse(
+                description="Refresh token revocado correctamente."
+            ),
+            status.HTTP_400_BAD_REQUEST: OpenApiResponse(
+                description="Refresh token inválido o ya revocado."
+            ),
+            status.HTTP_401_UNAUTHORIZED: OpenApiResponse(
+                description="Se requiere autenticación."
+            ),
+        },
+    )
+    def post(self, request):
+        serializer = LogoutSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        try:
+            RefreshToken(serializer.validated_data["refresh"]).blacklist()
+        except TokenError:
+            return Response(
+                {"detail": "Refresh token inválido o ya revocado."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        return Response(
+            {"detail": "Sesión cerrada correctamente."},
+            status=status.HTTP_200_OK,
         )
 
 

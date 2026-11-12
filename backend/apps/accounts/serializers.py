@@ -15,6 +15,10 @@ class UserRegisterSerializer(serializers.ModelSerializer):
         return user
 
 
+class LogoutSerializer(serializers.Serializer):
+    refresh = serializers.CharField()
+
+
 # Rsponses Schmemas
 
 

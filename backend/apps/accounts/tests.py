@@ -1,6 +1,8 @@
 import pytest
 from django.urls import reverse
 from rest_framework import status
+from rest_framework_simplejwt.token_blacklist.models import BlacklistedToken
+
 from .models import User
 
 
@@ -75,3 +77,53 @@ def test_api_login_incorrect(api_client):
 
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
     assert "detail" in response_data
+
+
+@pytest.mark.django_db
+def test_logout_revokes_refresh_token(registered_client, api_client):
+    client, access, refresh = registered_client
+    client.credentials(HTTP_AUTHORIZATION=f"Bearer {access}")
+
+    response = client.post(reverse("accounts:logout"), {"refresh": refresh})
+
+    assert response.status_code == status.HTTP_200_OK
+    assert BlacklistedToken.objects.count() == 1
+
+    refresh_response = api_client.post(
+        reverse("accounts:token_refresh"), {"refresh": refresh}
+    )
+    assert refresh_response.status_code == status.HTTP_401_UNAUTHORIZED
+
+
+@pytest.mark.django_db
+def test_logout_requires_authentication(api_client, registered_client):
+    _, _, refresh = registered_client
+
+    response = api_client.post(reverse("accounts:logout"), {"refresh": refresh})
+
+    assert response.status_code == status.HTTP_401_UNAUTHORIZED
+    assert BlacklistedToken.objects.count() == 0
+
+
+@pytest.mark.django_db
+def test_logout_with_invalid_refresh(authenticated_client):
+    response = authenticated_client.post(
+        reverse("accounts:logout"), {"refresh": "not-a-valid-token"}
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert BlacklistedToken.objects.count() == 0
+
+
+@pytest.mark.django_db
+def test_logout_twice(registered_client):
+    client, access, refresh = registered_client
+    client.credentials(HTTP_AUTHORIZATION=f"Bearer {access}")
+    url = reverse("accounts:logout")
+
+    first = client.post(url, {"refresh": refresh})
+    second = client.post(url, {"refresh": refresh})
+
+    assert first.status_code == status.HTTP_200_OK
+    assert second.status_code == status.HTTP_400_BAD_REQUEST
+    assert BlacklistedToken.objects.count() == 1
