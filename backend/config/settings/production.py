@@ -11,10 +11,6 @@ CORS_ALLOWED_ORIGINS = env.list("CORS_ALLOWED_ORIGINS")
 DATABASES = {"default": env.db()}
 
 
-THIRD_MIDDLEWARE = [
-    "whitenoise.middleware.WhiteNoiseMiddleware",
-]
-
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=EXPIRE_TIME_TOKEN_MINUTES),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=EXPIRE_TIME_TOKEN_DAYS),

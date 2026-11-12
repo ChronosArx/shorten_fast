@@ -20,7 +20,7 @@ DJANGO_APPS = [
 ]
 
 LOCAL_APPS = [
-    "apps.users",
+    "apps.accounts",
     "apps.links",
 ]
 
@@ -100,13 +100,11 @@ USE_I18N = True
 
 USE_TZ = True
 
-AUTH_USER_MODEL = "users.User"
+AUTH_USER_MODEL = "accounts.User"
 
 
 STATIC_URL = "static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
-STATICFILES_DIRS = [BASE_DIR / "static"]
-STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
@@ -123,4 +121,13 @@ SPECTACULAR_SETTINGS = {
     "DESCRIPTION": "Este proyecto puede acortar urls y crear códigos qr, permite registro de usuarios y su autentificación por medio de tokens jwt.",
     "VERSION": "0.1.0",
     "SERVE_INCLUDE_SCHEMA": False,
+    "TAGS": [
+        {"name": "Auth", "description": "Registro, login y renovación de tokens."},
+        {"name": "Links", "description": "CRUD de links y generación de códigos QR."},
+        {"name": "Redirects", "description": "Redirección pública por código."},
+    ],
+    "SWAGGER_UI_SETTINGS": {
+        "persistAuthorization": True,
+        "displayRequestDuration": True,
+    },
 }
