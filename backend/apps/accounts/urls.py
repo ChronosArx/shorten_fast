@@ -2,7 +2,7 @@ from django.urls import path
 
 from .views import Register, CustomTokenObtainPairView, CustomTokenRefreshView
 
-app_name = "users"
+app_name = "accounts"
 
 urlpatterns = [
     path("auth/register/", Register.as_view(), name="register"),
