@@ -15,22 +15,17 @@ class UserRegisterSerializer(serializers.ModelSerializer):
         return user
 
 
-class LogoutSerializer(serializers.Serializer):
-    refresh = serializers.CharField()
-
-
-# Rsponses Schmemas
+# Response Schemas
 
 
 class TokenPairResponseSerializer(serializers.Serializer):
     access = serializers.CharField()
-    refresh = serializers.CharField()
     token_type = serializers.CharField()
 
 
 class TokenObtainPairResponseSerializer(serializers.Serializer):
     access = serializers.CharField()
-    refresh = serializers.CharField()
+    token_type = serializers.CharField()
 
 
 class TokenRefreshResponseSerializer(serializers.Serializer):

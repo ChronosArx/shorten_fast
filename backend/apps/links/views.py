@@ -13,11 +13,7 @@ from drf_spectacular.types import OpenApiTypes
 
 from .serializers import QRCodeRequestSerializer, ShortLinkSerializer
 from apps.links.models import Link
-from apps.links.services import (
-    generate_qr,
-    create_short_link,
-    get_original_url,
-)
+from apps.links.services import generate_qr, create_short_link, get_original_url
 from .permissions import IsAuthenticatedOrCreate
 from apps.accounts.models import User
 
@@ -80,7 +76,7 @@ class ShortLinkViewSet(
         serializer.is_valid(raise_exception=True)
         original_url = serializer.validated_data["original_url"]
         title = serializer.validated_data.get("title")
-        user = cast(User, request.user) if request.user.is_authenticated else None
+        user = request.user if request.user.is_authenticated else None
         link = create_short_link(title=title, original_url=original_url, user=user)
         serializer = self.get_serializer(link)
         return Response(serializer.data, status=status.HTTP_201_CREATED)

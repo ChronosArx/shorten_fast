@@ -1,11 +1,17 @@
 import pytest
-from rest_framework.test import APIClient
+from django.conf import settings
 from django.urls import reverse
+from rest_framework.test import APIClient
 
 
 @pytest.fixture
 def api_client():
     return APIClient()
+
+
+@pytest.fixture
+def logout_url():
+    return reverse("accounts:logout")
 
 
 @pytest.fixture
@@ -46,7 +52,8 @@ def registered_client(register_data):
     url = reverse("accounts:register")
     response = client.post(url, register_data)
     response_data = response.json()
-    return client, response_data.get("access"), response_data.get("refresh")
+    refresh = client.cookies[settings.AUTH_REFRESH_COOKIE_NAME].value
+    return client, response_data["access"], refresh
 
 
 @pytest.fixture

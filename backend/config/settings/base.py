@@ -9,6 +9,12 @@ env = environ.Env(DEBUG=(bool, False))
 DOMAIN_URL = env.str("DOMAIN_URL", default="http://localhost:8000")
 CORS_ALLOW_CREDENTIALS = True
 
+# Refresh token cookie
+AUTH_REFRESH_COOKIE_NAME = "refresh_token"
+AUTH_REFRESH_COOKIE_PATH = "/api/auth/refresh/"
+AUTH_REFRESH_COOKIE_SAMESITE = env.str("AUTH_COOKIE_SAMESITE", default="Lax")
+AUTH_REFRESH_COOKIE_SECURE = env.bool("AUTH_COOKIE_SECURE", default=False)
+
 # Application definition
 DJANGO_APPS = [
     "django.contrib.admin",
@@ -122,6 +128,15 @@ SPECTACULAR_SETTINGS = {
     "DESCRIPTION": "Este proyecto puede acortar urls y crear códigos qr, permite registro de usuarios y su autentificación por medio de tokens jwt.",
     "VERSION": "0.1.0",
     "SERVE_INCLUDE_SCHEMA": False,
+    "APPEND_COMPONENTS": {
+        "securitySchemes": {
+            "refreshCookie": {
+                "type": "apiKey",
+                "in": "cookie",
+                "name": AUTH_REFRESH_COOKIE_NAME,
+            }
+        }
+    },
     "TAGS": [
         {"name": "Auth", "description": "Registro, login y renovación de tokens."},
         {"name": "Links", "description": "CRUD de links y generación de códigos QR."},
