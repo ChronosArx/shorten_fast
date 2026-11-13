@@ -56,6 +56,10 @@ exclude = ["migrations/", ".venv/"]
 incremental = true
 cache_dir = ".mypy_cache"
 
+[[tool.mypy.overrides]]
+module = ["environ"]
+ignore_missing_imports = true
+
 [tool.django-stubs]
 django_settings_module = "config.settings.dev"
 strict_settings = true
