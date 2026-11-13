@@ -55,6 +55,8 @@ DOMAIN_URL=?
 RESEND_API_KEY=?
 ALLOWED_HOSTS=?
 CORS_ALLOWED_ORIGINS=?
+AUTH_COOKIE_SECURE=?
+AUTH_COOKIE_SAMESITE=?
 ```
 
 Todas las variables de entorno son necesarias para que funcione el proyecto. Para ejecutarlo en modo desarrollo no es necesario colocar manualmente todas, ya que tienen un valor por defecto a excepción de RESEND_API_KEY que si se necesitara un valor de manera explícita.
@@ -78,6 +80,20 @@ A continuación una explicación de lo que es cada una de las variables de entor
 - **ALLOWED_HOSTS**: Esta es una lista de los nombres de hosts o dominio por los cuales se es permitido hacer las consultas al backend y es solo necesaria para el modo de producción.
 
 - **RESEND_API_KEY**: Es una api key que es proveída por resend para poder realizar el envío de correos electrónicos.
+
+- **AUTH_COOKIE_SECURE**: Indica si la cookie del refresh token debe enviarse solo por HTTPS. Por defecto es `False` en desarrollo y `True` en producción.
+
+- **AUTH_COOKIE_SAMESITE**: Política `SameSite` de la cookie del refresh token. Por defecto es `Lax`, que es la opción adecuada cuando el frontend y el backend están en el mismo sitio.
+
+## Autenticación con cookie HttpOnly
+
+El *access token* viaja únicamente en el cuerpo de las respuestas JSON, mientras que el *refresh token* se envía en una cookie `HttpOnly` llamada `refresh_token`, limitada a la ruta `/api/auth/` y con `SameSite=Lax` por defecto.
+
+- `POST /api/auth/register/` y `POST /api/auth/login/` devuelven `{ "access": "...", "token_type": "Bearer" }` y establecen la cookie del refresh token.
+- `POST /api/auth/refresh/` toma el refresh token de la cookie (no del body) y devuelve únicamente un nuevo `access`. La cookie no se rota.
+- `POST /api/auth/logout/` toma el refresh token de la cookie, lo agrega a la blacklist y elimina la cookie. No requiere enviar el access token.
+
+El frontend debe enviar la cookie en cada petición a estos endpoints usando `credentials: "include"` con `fetch` o `withCredentials: true` con axios. El refresh token nunca debe leerse ni almacenarse desde JavaScript.
 
 Cuando las variables de entorno se encuentren correctamente configuradas es momento de ejecutar el servidor con el siguiente comando.
 

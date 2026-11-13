@@ -1,6 +1,7 @@
 {
     "python.analysis.autoImportCompletions": true,
-    "python.analysis.typeCheckingMode": "standard",
+    "python.analysis.enableDjangoSupport": true,
+    "python.analysis.typeCheckingMode": "off",
     "python.analysis.diagnosticSeverityOverrides": {
         "reportIncompatibleVariableOverride": "none"
     }
