@@ -1,4 +1,5 @@
 import pytest
+from pytest_mock import MockerFixture
 
 from apps.links.services import (
     create_short_link,
@@ -9,7 +10,7 @@ from apps.links.services import (
 
 
 @pytest.mark.django_db
-def test_create_short_link():
+def test_create_short_link() -> None:
     link = create_short_link(title="Test", original_url="https://example.com/example")
 
     assert link.title == "Test"
@@ -21,7 +22,7 @@ def test_create_short_link():
 
 
 @pytest.mark.django_db
-def test_create_short_link_with_custom_length():
+def test_create_short_link_with_custom_length() -> None:
     link = create_short_link(
         title="Test",
         original_url="https://example.com/example",
@@ -32,7 +33,7 @@ def test_create_short_link_with_custom_length():
 
 
 @pytest.mark.django_db
-def test_create_short_link_generates_unique_code(mocker):
+def test_create_short_link_generates_unique_code(mocker: MockerFixture) -> None:
     mocker.patch(
         "apps.links.services.generate_random_code",
         side_effect=["abc123", "abc123", "def456"],
@@ -45,12 +46,12 @@ def test_create_short_link_generates_unique_code(mocker):
     assert second.code == "def456"
 
 
-def test_format_short_url():
+def test_format_short_url() -> None:
     assert format_short_url("abc123").endswith("/abc123")
 
 
 @pytest.mark.django_db
-def test_get_original_url():
+def test_get_original_url() -> None:
     link = create_short_link(title="Test", original_url="https://example.com/example")
 
     assert get_original_url(link.code) == "https://example.com/example"
@@ -60,7 +61,7 @@ def test_get_original_url():
 
 
 @pytest.mark.django_db
-def test_get_original_url_increments_clicks():
+def test_get_original_url_increments_clicks() -> None:
     link = create_short_link(title="Test", original_url="https://example.com/example")
 
     get_original_url(link.code)
@@ -71,11 +72,11 @@ def test_get_original_url_increments_clicks():
 
 
 @pytest.mark.django_db
-def test_get_original_url_unknown_code():
+def test_get_original_url_unknown_code() -> None:
     assert get_original_url("noexiste") is None
 
 
-def test_generate_qr():
+def test_generate_qr() -> None:
     buffer = generate_qr("https://example.com")
     content = buffer.read()
 

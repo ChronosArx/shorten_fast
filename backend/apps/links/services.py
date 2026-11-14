@@ -43,7 +43,7 @@ def create_short_link(
     return link
 
 
-def get_original_url(code: str):
+def get_original_url(code: str) -> str | None:
     link = Link.objects.filter(code=code).first()
     if not link:
         return None
@@ -52,7 +52,7 @@ def get_original_url(code: str):
     return link.original_url
 
 
-def generate_qr(url: str):
+def generate_qr(url: str) -> io.BytesIO:
     qr = segno.make_qr(url)
     buffer = io.BytesIO()
     qr.save(buffer, kind="png", scale=10, dark="black", light="white")

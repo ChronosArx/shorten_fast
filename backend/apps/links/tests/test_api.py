@@ -1,12 +1,13 @@
 import pytest
 from django.urls import reverse
 from rest_framework import status
+from rest_framework.test import APIClient
 
 from apps.links.models import Link
 
 
 @pytest.mark.django_db
-def test_short_link(authenticated_client):
+def test_short_link(authenticated_client: APIClient) -> None:
     url = reverse("shortlink-list")
 
     response = authenticated_client.post(
@@ -51,14 +52,14 @@ def test_short_link(authenticated_client):
 
 
 @pytest.mark.django_db
-def test_short_link_incorrect(authenticated_client):
+def test_short_link_incorrect(authenticated_client: APIClient) -> None:
     url = reverse("shortlink-list")
     response = authenticated_client.post(url, data={"original_url": "no-is-url"})
     assert response.status_code == status.HTTP_400_BAD_REQUEST
 
 
 @pytest.mark.django_db
-def test_get_links(authenticated_client):
+def test_get_links(authenticated_client: APIClient) -> None:
     url = reverse("shortlink-list")
 
     response_empty = authenticated_client.get(url)
@@ -86,14 +87,14 @@ def test_get_links(authenticated_client):
 
 
 @pytest.mark.django_db
-def test_get_links_incorrect(api_client):
+def test_get_links_incorrect(api_client: APIClient) -> None:
     url = reverse("shortlink-list")
     response = api_client.get(url)
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
 
 @pytest.mark.django_db
-def test_get_link(authenticated_client):
+def test_get_link(authenticated_client: APIClient) -> None:
     url_post = reverse("shortlink-list")
     response_post = authenticated_client.post(
         url_post,
@@ -118,7 +119,9 @@ def test_get_link(authenticated_client):
 
 
 @pytest.mark.django_db
-def test_get_link_incorrect(authenticated_client, api_client):
+def test_get_link_incorrect(
+    authenticated_client: APIClient, api_client: APIClient
+) -> None:
     url = reverse("shortlink-detail", args=[1])
 
     response = api_client.get(url)
@@ -129,7 +132,7 @@ def test_get_link_incorrect(authenticated_client, api_client):
 
 
 @pytest.mark.django_db
-def test_update_link(authenticated_client):
+def test_update_link(authenticated_client: APIClient) -> None:
     url_post = reverse("shortlink-list")
     response = authenticated_client.post(
         url_post,
@@ -155,7 +158,9 @@ def test_update_link(authenticated_client):
 
 
 @pytest.mark.django_db
-def test_update_link_incorrect(authenticated_client, api_client):
+def test_update_link_incorrect(
+    authenticated_client: APIClient, api_client: APIClient
+) -> None:
     url_update = reverse("shortlink-detail", args=[1])
 
     response = api_client.put(
@@ -190,7 +195,7 @@ def test_update_link_incorrect(authenticated_client, api_client):
 
 
 @pytest.mark.django_db
-def test_delete_link(authenticated_client):
+def test_delete_link(authenticated_client: APIClient) -> None:
     url_post = reverse("shortlink-list")
     response_post = authenticated_client.post(
         url_post,
@@ -205,7 +210,9 @@ def test_delete_link(authenticated_client):
 
 
 @pytest.mark.django_db
-def test_delete_link_incorrect(authenticated_client, api_client):
+def test_delete_link_incorrect(
+    authenticated_client: APIClient, api_client: APIClient
+) -> None:
     url = reverse("shortlink-detail", args=[1])
 
     response = api_client.delete(url)
@@ -216,7 +223,7 @@ def test_delete_link_incorrect(authenticated_client, api_client):
 
 
 @pytest.mark.django_db
-def test_redirect(authenticated_client):
+def test_redirect(authenticated_client: APIClient) -> None:
     url_post = reverse("shortlink-list")
     response_post = authenticated_client.post(
         url_post,
@@ -235,7 +242,7 @@ def test_redirect(authenticated_client):
 
 
 @pytest.mark.django_db
-def test_redirect_incorrect(authenticated_client):
+def test_redirect_incorrect(authenticated_client: APIClient) -> None:
     url = reverse("redirects", args=["123456"])
     response = authenticated_client.get(url)
 
@@ -243,7 +250,7 @@ def test_redirect_incorrect(authenticated_client):
 
 
 @pytest.mark.django_db
-def test_clicks_is_read_only(authenticated_client):
+def test_clicks_is_read_only(authenticated_client: APIClient) -> None:
     url = reverse("shortlink-list")
 
     response = authenticated_client.post(
@@ -259,7 +266,7 @@ def test_clicks_is_read_only(authenticated_client):
 
 
 @pytest.mark.django_db
-def test_get_qr(authenticated_client):
+def test_get_qr(authenticated_client: APIClient) -> None:
     url = reverse("shortlink-get-qr")
 
     response = authenticated_client.post(
@@ -272,7 +279,7 @@ def test_get_qr(authenticated_client):
 
 
 @pytest.mark.django_db
-def test_get_qr_incorrect(api_client):
+def test_get_qr_incorrect(api_client: APIClient) -> None:
     url = reverse("shortlink-get-qr")
 
     response = api_client.post(

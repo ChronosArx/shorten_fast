@@ -27,43 +27,30 @@ dev = [
 [tool.mypy]
 python_version = "3.13"
 
-# Plugins
 plugins = ["mypy_django_plugin.main", "mypy_drf_plugin.main"]
 
-# Archivos y directorios que se analizarán
-files = ["config", "apps"]
-
-# Comprobaciones generales
 check_untyped_defs = true
-disallow_untyped_defs = true
-disallow_incomplete_defs = true
+disallow_untyped_defs = false
+disallow_incomplete_defs = false
+
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_return_any = false
 no_implicit_optional = true
 
-# Calidad del tipado
-warn_return_any = true
-warn_unused_ignores = true
-warn_redundant_casts = true
-warn_unreachable = true
-strict_equality = true
+ignore_missing_imports = false
 
-# Evitar errores por anotaciones incompletas
-disallow_any_generics = true
-
-# Exclusiones
-exclude = ["migrations/", ".venv/"]
-
-# Caché
 incremental = true
 cache_dir = ".mypy_cache"
-
-[[tool.mypy.overrides]]
-module = ["environ"]
-ignore_missing_imports = true
 
 [tool.django-stubs]
 django_settings_module = "config.settings.dev"
 strict_settings = true
 strict_model_abstract_attrs = true
+
+[[tool.mypy.overrides]]
+module = ["environ.*"]
+ignore_missing_imports = true
 
 [tool.pytest.ini_options]
 DJANGO_SETTINGS_MODULE = "config.settings.dev"

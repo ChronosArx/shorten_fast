@@ -54,7 +54,7 @@ THIRD_MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
 ]
 
-LOCAL_MIDDLEWARE = []
+LOCAL_MIDDLEWARE: list[str] = []
 
 MIDDLEWARE = DJANGO_MIDDLEWARE + THIRD_MIDDLEWARE + LOCAL_MIDDLEWARE
 

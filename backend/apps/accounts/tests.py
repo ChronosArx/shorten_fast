@@ -1,7 +1,11 @@
+from typing import Any
+
 import pytest
 from django.conf import settings
 from django.urls import reverse
 from rest_framework import status
+from rest_framework.response import Response
+from rest_framework.test import APIClient
 from rest_framework_simplejwt.settings import api_settings
 from rest_framework_simplejwt.token_blacklist.models import BlacklistedToken
 from rest_framework_simplejwt.tokens import AccessToken
@@ -11,11 +15,13 @@ from .models import User
 COOKIE_NAME = settings.AUTH_REFRESH_COOKIE_NAME
 
 
-def get_refresh_from_client(client):
-    return client.cookies[COOKIE_NAME].value
+def get_refresh_from_client(client: APIClient) -> str:
+    return str(client.cookies[COOKIE_NAME].value)
 
 
-def assert_refresh_cookie_set(response, refresh_token=None):
+def assert_refresh_cookie_set(
+    response: Response, refresh_token: str | None = None
+) -> None:
     assert COOKIE_NAME in response.cookies
     cookie = response.cookies[COOKIE_NAME]
 
@@ -31,7 +37,7 @@ def assert_refresh_cookie_set(response, refresh_token=None):
         assert cookie.value == refresh_token
 
 
-def assert_refresh_cookie_cleared(response):
+def assert_refresh_cookie_cleared(response: Response) -> None:
     assert COOKIE_NAME in response.cookies
     cookie = response.cookies[COOKIE_NAME]
 
@@ -40,7 +46,7 @@ def assert_refresh_cookie_cleared(response):
 
 
 @pytest.mark.django_db
-def test_create_user():
+def test_create_user() -> None:
     user = User.objects.create_user(
         email="test@test.com",
         password="testpassword",
@@ -50,7 +56,7 @@ def test_create_user():
 
 
 @pytest.mark.django_db
-def test_api_register(api_client, register_data):
+def test_api_register(api_client: APIClient, register_data: dict[str, str]) -> None:
     response = api_client.post(reverse("accounts:register"), register_data)
     assert response.status_code == status.HTTP_201_CREATED
 
@@ -67,7 +73,7 @@ def test_api_register(api_client, register_data):
 
 
 @pytest.mark.django_db
-def test_api_register_incorrect(api_client):
+def test_api_register_incorrect(api_client: APIClient) -> None:
     bad_email_data = {
         "username": "testuser",
         "email": "bad-email",
@@ -88,7 +94,7 @@ def test_api_register_incorrect(api_client):
 
 
 @pytest.mark.django_db
-def test_api_login(api_client):
+def test_api_login(api_client: APIClient) -> None:
     register_data = {
         "username": "loginuser",
         "email": "login@example.com",
@@ -113,7 +119,7 @@ def test_api_login(api_client):
 
 
 @pytest.mark.django_db
-def test_api_login_incorrect(api_client):
+def test_api_login_incorrect(api_client: APIClient) -> None:
     login_data = {
         "email": "nonexistent@example.com",
         "password": "wrongpassword",
@@ -127,7 +133,9 @@ def test_api_login_incorrect(api_client):
 
 
 @pytest.mark.django_db
-def test_refresh_returns_access_from_cookie(registered_client):
+def test_refresh_returns_access_from_cookie(
+    registered_client: tuple[APIClient, Any, str],
+) -> None:
     client, _, refresh = registered_client
 
     response = client.post(reverse("accounts:token_refresh"))
@@ -142,7 +150,7 @@ def test_refresh_returns_access_from_cookie(registered_client):
 
 
 @pytest.mark.django_db
-def test_refresh_without_cookie(api_client):
+def test_refresh_without_cookie(api_client: APIClient) -> None:
     response = api_client.post(reverse("accounts:token_refresh"))
 
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
@@ -151,7 +159,7 @@ def test_refresh_without_cookie(api_client):
 
 
 @pytest.mark.django_db
-def test_refresh_with_invalid_cookie(api_client):
+def test_refresh_with_invalid_cookie(api_client: APIClient) -> None:
     api_client.cookies[COOKIE_NAME] = "not-a-valid-token"
 
     response = api_client.post(reverse("accounts:token_refresh"))
@@ -162,7 +170,11 @@ def test_refresh_with_invalid_cookie(api_client):
 
 
 @pytest.mark.django_db
-def test_refresh_after_logout_fails(api_client, registered_client, logout_url):
+def test_refresh_after_logout_fails(
+    api_client: APIClient,
+    registered_client: tuple[APIClient, Any, str],
+    logout_url: str,
+) -> None:
     client, _, refresh = registered_client
     client.post(logout_url)
 
@@ -175,7 +187,11 @@ def test_refresh_after_logout_fails(api_client, registered_client, logout_url):
 
 
 @pytest.mark.django_db
-def test_logout_revokes_refresh_token(registered_client, api_client, logout_url):
+def test_logout_revokes_refresh_token(
+    registered_client: tuple[APIClient, Any, str],
+    api_client: APIClient,
+    logout_url: str,
+) -> None:
     client, _, refresh = registered_client
 
     response = client.post(logout_url)
@@ -190,7 +206,9 @@ def test_logout_revokes_refresh_token(registered_client, api_client, logout_url)
 
 
 @pytest.mark.django_db
-def test_logout_does_not_require_access_token(registered_client, logout_url):
+def test_logout_does_not_require_access_token(
+    registered_client: tuple[APIClient, Any, str], logout_url: str
+) -> None:
     client, _, _ = registered_client
 
     # El cliente no envía cabecera Authorization, solo la cookie.
@@ -201,7 +219,7 @@ def test_logout_does_not_require_access_token(registered_client, logout_url):
 
 
 @pytest.mark.django_db
-def test_logout_without_cookie(api_client, logout_url):
+def test_logout_without_cookie(api_client: APIClient, logout_url: str) -> None:
     response = api_client.post(logout_url)
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
@@ -209,7 +227,7 @@ def test_logout_without_cookie(api_client, logout_url):
 
 
 @pytest.mark.django_db
-def test_logout_with_invalid_refresh(api_client, logout_url):
+def test_logout_with_invalid_refresh(api_client: APIClient, logout_url: str) -> None:
     api_client.cookies[COOKIE_NAME] = "not-a-valid-token"
 
     response = api_client.post(logout_url)
@@ -220,7 +238,9 @@ def test_logout_with_invalid_refresh(api_client, logout_url):
 
 
 @pytest.mark.django_db
-def test_logout_twice(registered_client, logout_url):
+def test_logout_twice(
+    registered_client: tuple[APIClient, Any, str], logout_url: str
+) -> None:
     client, _, _ = registered_client
 
     first = client.post(logout_url)

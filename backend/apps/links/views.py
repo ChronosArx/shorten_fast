@@ -1,6 +1,7 @@
-from typing import Any, cast
+from typing import Any
 
-from django.http.response import FileResponse
+from django.db.models import QuerySet
+from django.http.response import FileResponse, HttpResponseRedirect
 from django.shortcuts import redirect
 from rest_framework.request import Request
 from rest_framework.response import Response
@@ -15,7 +16,6 @@ from .serializers import QRCodeRequestSerializer, ShortLinkSerializer
 from apps.links.models import Link
 from apps.links.services import generate_qr, create_short_link, get_original_url
 from .permissions import IsAuthenticatedOrCreate
-from apps.accounts.models import User
 
 
 class Redirects(APIView):
@@ -44,7 +44,7 @@ class Redirects(APIView):
             ),
         },
     )
-    def get(self, request: Request, code):
+    def get(self, request: Request, code: str) -> Response | HttpResponseRedirect:
         original_url = get_original_url(code=code)
 
         if not original_url:
@@ -57,14 +57,12 @@ class Redirects(APIView):
 
 
 @extend_schema(tags=["Links"])
-class ShortLinkViewSet(
-    viewsets.ModelViewSet,
-):
+class ShortLinkViewSet(viewsets.ModelViewSet[Link]):
     serializer_class = ShortLinkSerializer
     permission_classes = [IsAuthenticatedOrCreate]
     http_method_names = ["get", "post", "delete", "put"]
 
-    def get_queryset(self):
+    def get_queryset(self) -> QuerySet[Link]:
         user = self.request.user
         if user.is_anonymous:
             return Link.objects.none()
@@ -88,7 +86,7 @@ class ShortLinkViewSet(
         responses={(status.HTTP_200_OK, "image/png"): OpenApiTypes.BINARY},
     )
     @action(methods=["POST"], url_path="get-qr", detail=False, url_name="get-qr")
-    def get_qrcode(self, request) -> FileResponse:
+    def get_qrcode(self, request: Request) -> FileResponse:
         serializer = QRCodeRequestSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         qrcode = generate_qr(serializer.validated_data["original_url"])

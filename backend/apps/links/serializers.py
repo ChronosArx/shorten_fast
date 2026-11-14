@@ -1,8 +1,10 @@
+from typing import Any
+
 from rest_framework import serializers
 from apps.links.models import Link
 
 
-class ShortLinkSerializer(serializers.ModelSerializer):
+class ShortLinkSerializer(serializers.ModelSerializer[Link]):
     class Meta:
         model = Link
         fields = [
@@ -17,5 +19,5 @@ class ShortLinkSerializer(serializers.ModelSerializer):
         read_only_fields = ["id", "short_url", "code", "clicks", "user"]
 
 
-class QRCodeRequestSerializer(serializers.Serializer):
+class QRCodeRequestSerializer(serializers.Serializer[Any]):
     original_url = serializers.URLField()

@@ -1,6 +1,9 @@
+from typing import Any, cast
+
 from drf_spectacular.utils import OpenApiResponse, extend_schema
 from rest_framework import status
 from rest_framework.permissions import AllowAny
+from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
@@ -15,6 +18,8 @@ from .serializers import (
     TokenRefreshResponseSerializer,
     UserRegisterSerializer,
 )
+
+REFRESH_COOKIE_AUTH = cast(list[str], [{"refreshCookie": []}])
 
 
 class Register(APIView):
@@ -31,7 +36,7 @@ class Register(APIView):
         responses={status.HTTP_201_CREATED: TokenPairResponseSerializer},
         auth=[],
     )
-    def post(self, request, *args, **kwargs):
+    def post(self, request: Request, *args: Any, **kwargs: Any) -> Response:
 
         serializer = UserRegisterSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -64,7 +69,7 @@ class LogoutView(APIView):
             "pueda volver a usarse y elimina la cookie."
         ),
         request=None,
-        auth=[{"refreshCookie": []}],
+        auth=REFRESH_COOKIE_AUTH,
         responses={
             status.HTTP_200_OK: OpenApiResponse(
                 description="Refresh token revocado correctamente."
@@ -74,7 +79,7 @@ class LogoutView(APIView):
             ),
         },
     )
-    def post(self, request):
+    def post(self, request: Request) -> Response:
         refresh_token = get_refresh_cookie(request)
 
         if not refresh_token:
@@ -86,7 +91,9 @@ class LogoutView(APIView):
             return response
 
         try:
-            RefreshToken(refresh_token).blacklist()
+            # simplejwt acepta el token como `str` en tiempo de ejecución,
+            # aunque sus anotaciones solo declaren `Token | None`.
+            RefreshToken(refresh_token).blacklist()  # type: ignore[arg-type]
         except TokenError:
             response = Response(
                 {"detail": "Refresh token inválido o ya revocado."},
@@ -113,7 +120,7 @@ class LogoutView(APIView):
     responses={status.HTTP_200_OK: TokenObtainPairResponseSerializer},
 )
 class CustomTokenObtainPairView(TokenObtainPairView):
-    def post(self, request, *args, **kwargs):
+    def post(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         serializer = self.get_serializer(data=request.data)
 
         try:
@@ -134,7 +141,7 @@ class CustomTokenObtainPairView(TokenObtainPairView):
 
 @extend_schema(
     tags=["Auth"],
-    auth=[{"refreshCookie": []}],
+    auth=REFRESH_COOKIE_AUTH,
     summary="Renovar token de acceso",
     description=(
         "Toma el refresh token de la cookie HttpOnly y devuelve un nuevo access "
@@ -151,7 +158,7 @@ class CustomTokenObtainPairView(TokenObtainPairView):
 class CustomTokenRefreshView(TokenRefreshView):
     serializer_class = TokenRefreshSerializer
 
-    def post(self, request, *args, **kwargs):
+    def post(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         refresh_token = get_refresh_cookie(request)
 
         if not refresh_token:
