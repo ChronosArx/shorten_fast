@@ -32,13 +32,16 @@ plugins = ["mypy_django_plugin.main", "mypy_drf_plugin.main"]
 check_untyped_defs = true
 disallow_untyped_defs = false
 disallow_incomplete_defs = false
+no_implicit_optional = true
 
 warn_redundant_casts = true
 warn_unused_ignores = true
 warn_return_any = false
-no_implicit_optional = true
+warn_unreachable = true
 
-ignore_missing_imports = false
+warn_unused_configs = true
+show_error_codes = true
+pretty = true
 
 incremental = true
 cache_dir = ".mypy_cache"
@@ -49,7 +52,7 @@ strict_settings = true
 strict_model_abstract_attrs = true
 
 [[tool.mypy.overrides]]
-module = ["environ.*"]
+module = ["environ"]
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]

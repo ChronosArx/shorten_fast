@@ -3,19 +3,16 @@ import environ
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
-# environment variable
 environ.Env.read_env(BASE_DIR / ".env")
 env = environ.Env(DEBUG=(bool, False))
 DOMAIN_URL = env.str("DOMAIN_URL", default="http://localhost:8000")
 CORS_ALLOW_CREDENTIALS = True
 
-# Refresh token cookie
 AUTH_REFRESH_COOKIE_NAME = "refresh_token"
 AUTH_REFRESH_COOKIE_PATH = "/api/auth/refresh/"
 AUTH_REFRESH_COOKIE_SAMESITE = env.str("AUTH_COOKIE_SAMESITE", default="Lax")
 AUTH_REFRESH_COOKIE_SECURE = env.bool("AUTH_COOKIE_SECURE", default=False)
 
-# Application definition
 DJANGO_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
@@ -96,8 +93,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-# Internationalization
-# https://docs.djangoproject.com/en/5.1/topics/i18n/
 
 LANGUAGE_CODE = "en-us"
 
@@ -123,6 +118,7 @@ REST_FRAMEWORK = {
     ),
     "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.AllowAny",),
 }
+
 SPECTACULAR_SETTINGS = {
     "TITLE": "Shorten Fast API",
     "DESCRIPTION": "Este proyecto puede acortar urls y crear códigos qr, permite registro de usuarios y su autentificación por medio de tokens jwt.",

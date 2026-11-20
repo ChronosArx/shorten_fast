@@ -91,8 +91,6 @@ class LogoutView(APIView):
             return response
 
         try:
-            # simplejwt acepta el token como `str` en tiempo de ejecución,
-            # aunque sus anotaciones solo declaren `Token | None`.
             RefreshToken(refresh_token).blacklist()  # type: ignore[arg-type]
         except TokenError:
             response = Response(
@@ -185,5 +183,4 @@ class CustomTokenRefreshView(TokenRefreshView):
             clear_refresh_cookie(response)
             return response
 
-        # Sin rotación: la cookie conserva el mismo refresh token.
         return Response(serializer.validated_data, status=status.HTTP_200_OK)
